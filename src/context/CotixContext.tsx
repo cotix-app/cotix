@@ -24,13 +24,19 @@ type PlanType = "free" | "pro";
 type CotixContextType = {
   data: CotixData;
   setData: React.Dispatch<React.SetStateAction<CotixData>>;
+
   presupuestos: Presupuesto[];
   setPresupuestos: React.Dispatch<React.SetStateAction<Presupuesto[]>>;
+
   trialInicio: string;
   trialActivo: boolean;
   diasRestantes: number;
+
+  presupuestosHoy: number;
+  limiteDiario: number;
+
   plan: PlanType;
-  puedeCrearHoy: () => boolean;
+  puedeCrearHoy: boolean;
   registrarCreacionHoy: () => void;
   activarPro: () => void;
 };
@@ -86,65 +92,69 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
   }, [plan]);
 
   // 🔥 Cálculo días restantes
-  const inicio = new Date(trialInicio).getTime();
-  const ahora = new Date().getTime();
-  const diasPasados = Math.floor(
-    (ahora - inicio) / (1000 * 60 * 60 * 24)
+const inicio = new Date(trialInicio).getTime();
+const ahora = new Date().getTime();
+const diasPasados = Math.floor(
+  (ahora - inicio) / (1000 * 60 * 60 * 24)
+);
+
+const diasRestantes = Math.max(15 - diasPasados, 0);
+const trialActivo = plan === "free" && diasRestantes > 0;
+
+// 🔥 Registro diario
+const hoy = new Date().toISOString().split("T")[0];
+const registro = JSON.parse(
+  localStorage.getItem("cotixRegistroDiario") || "{}"
+);
+
+const presupuestosHoy: number = registro[hoy] || 0;
+
+const limiteDiario: number =
+  plan === "pro" ? Infinity : 2;
+
+const puedeCrearHoy: boolean =
+  plan === "pro"
+    ? true
+    : trialActivo && presupuestosHoy < limiteDiario;
+
+const registrarCreacionHoy = () => {
+  if (plan === "pro") return;
+
+  const registroActual = JSON.parse(
+    localStorage.getItem("cotixRegistroDiario") || "{}"
   );
 
-  const diasRestantes = Math.max(15 - diasPasados, 0);
+  registroActual[hoy] = (registroActual[hoy] || 0) + 1;
 
-  const trialActivo = plan === "free" && diasRestantes > 0;
+  localStorage.setItem(
+    "cotixRegistroDiario",
+    JSON.stringify(registroActual)
+  );
+};
 
-  // 🔥 Límite diario solo para FREE
-  const puedeCrearHoy = () => {
-    if (plan === "pro") return true;
-    if (!trialActivo) return false;
-
-    const hoy = new Date().toISOString().split("T")[0];
-    const registro = JSON.parse(
-      localStorage.getItem("cotixRegistroDiario") || "{}"
-    );
-    const usadosHoy = registro[hoy] || 0;
-
-    return usadosHoy < 2;
-  };
-
-  const registrarCreacionHoy = () => {
-    if (plan === "pro") return;
-
-    const hoy = new Date().toISOString().split("T")[0];
-    const registro = JSON.parse(
-      localStorage.getItem("cotixRegistroDiario") || "{}"
-    );
-
-    registro[hoy] = (registro[hoy] || 0) + 1;
-
-    localStorage.setItem("cotixRegistroDiario", JSON.stringify(registro));
-  };
-
-  const activarPro = () => {
-    setPlan("pro");
-  };
-
+const activarPro = () => {
+  setPlan("pro");
+};
   return (
     <CotixContext.Provider
-      value={{
-        data,
-        setData,
-        presupuestos,
-        setPresupuestos,
-        trialInicio,
-        trialActivo,
-        diasRestantes,
-        plan,
-        puedeCrearHoy,
-        registrarCreacionHoy,
-        activarPro,
-      }}
-    >
-      {children}
-    </CotixContext.Provider>
+  value={{
+    data,
+    setData,
+    presupuestos,
+    setPresupuestos,
+    trialInicio,
+    trialActivo,
+    diasRestantes,
+    presupuestosHoy,
+    limiteDiario,
+    plan,
+    puedeCrearHoy,
+    registrarCreacionHoy,
+    activarPro,
+  }}
+>
+  {children}
+</CotixContext.Provider>
   );
 }
 

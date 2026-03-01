@@ -1,3 +1,4 @@
+import Layout from "./components/Layout";
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -17,14 +18,16 @@ function App() {
       <Route path="/login" element={<Login />} />
 
       <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/cliente" element={<Cliente />} />
-        <Route path="/activo" element={<Activo />} />
-        <Route path="/problemas" element={<Problemas />} />
-        <Route path="/tareas" element={<Tareas />} />
-        <Route path="/resumen" element={<Resumen />} />
-        <Route path="/historial" element={<Historial />} />
-        <Route path="/configuracion" element={<Configuracion />} />
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/cliente" element={<Cliente />} />
+          <Route path="/activo" element={<Activo />} />
+          <Route path="/problemas" element={<Problemas />} />
+          <Route path="/tareas" element={<Tareas />} />
+          <Route path="/resumen" element={<Resumen />} />
+          <Route path="/historial" element={<Historial />} />
+          <Route path="/configuracion" element={<Configuracion />} />
+        </Route>
       </Route>
     </Routes>
   );

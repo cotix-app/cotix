@@ -1,63 +1,41 @@
-import { useNavigate } from "react-router-dom";
 import { useCotix } from "../context/CotixContext";
-import { appConfig } from "../config/appConfig";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   const navigate = useNavigate();
-  const { puedeCrearHoy, trialActivo, diasRestantes } =
-    useCotix();
-
-  const hoy = new Date().toISOString().split("T")[0];
-  const registro = JSON.parse(
-    localStorage.getItem("cotixRegistroDiario") || "{}"
-  );
-  const usadosHoy = registro[hoy] || 0;
-
-  const handleCrear = () => {
-    if (!trialActivo) {
-      alert("El período de prueba finalizó.");
-      return;
-    }
-
-    if (!puedeCrearHoy()) {
-      alert(
-        `Ya creaste ${appConfig.limiteDiarioFree} presupuestos hoy.`
-      );
-      return;
-    }
-
-    navigate("/cliente");
-  };
+  const { diasRestantes, presupuestosHoy, limiteDiario } = useCotix();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
-      <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-md text-center">
-        <h1 className="text-2xl font-bold text-blue-900 mb-2">
-          Cotix
-        </h1>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+      <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-lg text-center space-y-4">
+        <h1 className="text-3xl font-bold text-blue-900">Cotix</h1>
 
-        <p className="text-sm text-gray-500 mb-1">
-          Días restantes de prueba: {diasRestantes}
+        <p className="text-gray-600">
+          Días restantes de prueba: <strong>{diasRestantes}</strong>
         </p>
 
-        <p className="text-sm text-gray-500 mb-6">
-          Presupuestos usados hoy: {usadosHoy}/
-          {appConfig.limiteDiarioFree}
+        <p className="text-gray-600">
+          Presupuestos usados hoy:{" "}
+          <strong>
+            {presupuestosHoy}/{limiteDiario}
+          </strong>
         </p>
 
-        <button
-          onClick={handleCrear}
-          className="bg-blue-900 text-white py-3 px-4 rounded-xl w-full mb-3"
-        >
-          Crear Presupuesto
-        </button>
+        <div className="flex flex-col gap-3 pt-4">
+          <button
+            onClick={() => navigate("/cliente")}
+            className="bg-blue-900 text-white py-2 rounded-lg hover:bg-blue-800 transition"
+          >
+            Crear Presupuesto
+          </button>
 
-        <button
-          onClick={() => navigate("/historial")}
-          className="bg-gray-800 text-white py-3 px-4 rounded-xl w-full"
-        >
-          Historial
-        </button>
+          <button
+            onClick={() => navigate("/historial")}
+            className="bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300 transition"
+          >
+            Historial
+          </button>
+        </div>
       </div>
     </div>
   );
