@@ -1,15 +1,11 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
-export default function ProtectedRoute({
-  children,
-}: {
-  children: any;
-}) {
+export default function ProtectedRoute() {
   const user = localStorage.getItem("cotixUser");
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return <Outlet />;
 }

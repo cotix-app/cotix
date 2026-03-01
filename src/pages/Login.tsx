@@ -18,7 +18,7 @@ export default function Login() {
     localStorage.setItem("cotixUser", emailNormalizado);
     navigate("/");
   };
-
+console.log("allowedUsers:", allowedUsers);
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
       <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-md text-center">
