@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   const navigate = useNavigate();
-  const { diasRestantes, presupuestosHoy, limiteDiario } = useCotix();
+  const { diasRestantes, presupuestosHoy } = useCotix();
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
@@ -17,7 +17,7 @@ export default function Home() {
         <p className="text-gray-600">
           Presupuestos usados hoy:{" "}
           <strong>
-            {presupuestosHoy}/{limiteDiario}
+            {presupuestosHoy}
           </strong>
         </p>
 

@@ -23,7 +23,7 @@ export default function Home() {
     }
 
     if (!puedeCrearHoy) {
-      alert("Ya creaste 2 presupuestos hoy.");
+      alert("Ya creaste los presupuestos delplan Frre de hoy.");
       return;
     }
 
@@ -44,7 +44,7 @@ export default function Home() {
             </p>
 
             <p className="text-sm text-gray-500 mb-6">
-              Presupuestos usados hoy: {usadosHoy}/2
+              Presupuestos usados hoy: {usadosHoy}
             </p>
           </>
         )}
