@@ -22,7 +22,7 @@ export default function Home() {
       return;
     }
 
-    if (!puedeCrearHoy()) {
+    if (!puedeCrearHoy) {
       alert("Ya creaste 2 presupuestos hoy.");
       return;
     }
