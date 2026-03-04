@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Layout from "./components/Layout";
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -13,6 +14,24 @@ import Configuracion from "./pages/Configuracion";
 import Login from "./pages/Login";
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (showSplash) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-blue-700">
+        <img src="/splash.png" alt="Cotix" className="w-72" />
+      </div>
+    );
+  }
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
