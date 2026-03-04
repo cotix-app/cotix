@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="cotixBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1f6fd6"></stop>
+      <stop offset="100%" stop-color="#0b3d91"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- fondo -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#f3f4f6"></rect>
+
+  <!-- letra C -->
+  <path d="M42 16
+       A18 18 0 1 0 42 48
+       L42 38
+       A10 10 0 1 1 42 26
+       Z" fill="url(#cotixBlue)"></path>
+
+  <!-- detalle naranja -->
+  <rect x="38" y="16" width="14" height="12" rx="2" fill="#ff8a00"></rect>
+</svg>
