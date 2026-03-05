@@ -36,7 +36,7 @@
 
       #initial-splash img {
         width: 220px;
-        animation: fadeIn 0.8s ease-in-out;
+        animation: fadeIn 2s ease-in-out;
       }
 
       @keyframes fadeIn {
@@ -53,11 +53,11 @@
   </head>
 
   <body>
-    <!-- splash inmediato 
+    <!-- splash inmediato -->
     <div id="initial-splash">
       <img src="/splash.png" alt="Cotix" />
     </div>
-     -->
+
     <!-- React app -->
     <div id="root"></div>
 
@@ -66,7 +66,7 @@
         const splash = document.getElementById("initial-splash");
         if (splash) {
           splash.style.opacity = "0";
-          setTimeout(() => splash.remove(), 500);
+          setTimeout(() => splash.remove(), 50);
         }
       });
     </script>
