@@ -43,6 +43,7 @@ export default function Layout() {
       <main className="flex-1 relative z-0">
         <div key={location.pathname} className="animate-fade">
         <Outlet />
+        <CotixToast/>
         </div>
       </main>
       
@@ -50,6 +51,6 @@ export default function Layout() {
     </div>
    
   );
-   <CotixToast/>
+  
 }
 
