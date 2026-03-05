@@ -13,6 +13,14 @@ export default function Historial() {
     const nuevos = presupuestos.filter((p) => p.id !== id);
     setPresupuestos(nuevos);
   };
+  const {setData, setEditingId}= useCotix();
+
+
+  const editarPresupuesto = (presupuesto:any)=> {
+    setData(presupuesto.data)
+    setEditingId(presupuesto.id)
+    navigate("/cliente")
+  }
 
   const cambiarEstado = (id: string, nuevoEstado: string) => {
     const actualizados = presupuestos.map((p) =>
@@ -171,6 +179,16 @@ export default function Historial() {
                   >
                     Ver
                   </button>
+
+                  {presupuestos.map((p)=>(
+                  <button
+                      onClick={() =>
+                       editarPresupuesto(p)}
+                       className="text-blue-500 text-sm"
+                    >
+                      Editar
+                    </button>
+                  ))}
 
                   <button
                     onClick={() => eliminarPresupuesto(p.id)}

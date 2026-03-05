@@ -39,6 +39,10 @@ type CotixContextType = {
   puedeCrearHoy: boolean;
   registrarCreacionHoy: () => void;
   activarPro: () => void;
+
+  editingId: string | null
+  setEditingId:
+  React.Dispatch<React.SetStateAction<string | null >>
 };
 
 const CotixContext = createContext<CotixContextType | undefined>(undefined);
@@ -64,6 +68,8 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
           },
         };
   });
+
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [presupuestos, setPresupuestos] = useState<Presupuesto[]>(() => {
     const stored = localStorage.getItem("cotixHistorial");
@@ -132,6 +138,7 @@ const registrarCreacionHoy = () => {
   );
 };
 
+ 
 const activarPro = () => {
   setPlan("pro");
 };
@@ -151,6 +158,8 @@ const activarPro = () => {
     puedeCrearHoy,
     registrarCreacionHoy,
     activarPro,
+    editingId,
+    setEditingId
   }}
 >
   {children}

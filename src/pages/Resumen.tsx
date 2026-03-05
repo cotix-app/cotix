@@ -3,6 +3,8 @@ import { jsPDF } from "jspdf";
 import { useCotix } from "../context/CotixContext";
 import { supabase } from "../lib/supabase";
 
+const {editingId, setEditingId} = useCotix();
+
 export default function Resumen() {
   const navigate = useNavigate();
   const { data, setData, presupuestos, setPresupuestos, registrarCreacionHoy } =
@@ -139,7 +141,15 @@ export default function Resumen() {
       synced: false
     };
 
-    setPresupuestos([...presupuestos, nuevoPresupuesto]);
+    if(editingId){
+      const actualizados = presupuestos.map(p =>
+        p.id === editingId ? { ...p, data} : p)
+        setPresupuestos(actualizados)
+     } else {
+        setPresupuestos([...presupuestos, nuevoPresupuesto])
+      }
+    setEditingId(null);
+    
     registrarCreacionHoy();
 
     const nuevoData = {
