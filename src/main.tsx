@@ -5,6 +5,17 @@ import App from "./App";
 import { CotixProvider } from "./context/CotixContext";
 import "./index.css";
 
+import { registerSW } from "virtual:pwa-register/react";
+
+const updateSW = registerSW({
+  onNeedRefresh() {
+    window.dispatchEvent(new Event("cotix-update"));
+  },
+  onOfflineReady() {
+    console.log("Cotix lista para uso offline");
+  }
+});
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
