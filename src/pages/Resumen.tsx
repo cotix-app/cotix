@@ -128,6 +128,7 @@ export default function Resumen() {
     });
 
     doc.save(`${data.cliente.nombre}_Presupuesto.pdf`);
+    window.dispatchEvent(new Event("cotix-saved"));
 
     const nuevoPresupuesto = {
       id: Date.now().toString(),
@@ -151,7 +152,7 @@ export default function Resumen() {
     localStorage.setItem("cotixData", JSON.stringify(nuevoData));
 
     navigate("/");
-    window.dispatchEvent(new Event("cotix-saved"))
+    
 
   };
 
