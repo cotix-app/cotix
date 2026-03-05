@@ -8,6 +8,7 @@ import { syncPresupuestos } from "./lib/sync";
 import { registerSW } from "virtual:pwa-register";
 import AppBoot from "./components/AppBoot";
 import { supabase } from "./lib/supabase";
+import { startSessionTimeout } from "./lib/sessionTimeout";
 
 
 // ---- Sync cuando vuelve internet ----
@@ -34,6 +35,7 @@ async function autoLogin() {
 }
 
 autoLogin();
+startSessionTimeout();
 
 
 // ---- Eventos online/offline ----

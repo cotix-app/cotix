@@ -28,6 +28,7 @@ export async function register(email: string, password: string) {
 
 export async function logout() {
   await supabase.auth.signOut()
+  localStorage.removeItem("cotixUser")
 }
 
 export async function resetPassword(email: string) {
