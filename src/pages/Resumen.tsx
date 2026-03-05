@@ -165,6 +165,7 @@ export default function Resumen() {
     });
 
     navigate("/");
+    
   };
 
   return (
