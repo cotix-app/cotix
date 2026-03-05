@@ -45,9 +45,11 @@ export default function Layout() {
         <Outlet />
         </div>
       </main>
-      <CotixToast/>
+      
 
     </div>
+   
   );
+   <CotixToast/>
 }
 
