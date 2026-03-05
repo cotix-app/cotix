@@ -9,6 +9,14 @@ import { registerSW } from "virtual:pwa-register";
 
 import AppBoot from "./components/AppBoot";
 
+window.addEventListener("offline", () => {
+  window.dispatchEvent(new Event("cotix-offline"));
+});
+
+window.addEventListener("online", () => {
+  window.dispatchEvent(new Event("cotix-online"));
+});
+
 registerSW({
   onNeedRefresh() {
     window.dispatchEvent(new Event("cotix-update"));
