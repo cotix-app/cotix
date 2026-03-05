@@ -151,6 +151,8 @@ export default function Resumen() {
     localStorage.setItem("cotixData", JSON.stringify(nuevoData));
 
     navigate("/");
+    window.dispatchEvent(new Event("cotix-saved"))
+
   };
 
   return (
@@ -208,6 +210,7 @@ export default function Resumen() {
         >
           Generar PDF
         </button>
+        
       </div>
     </div>
   );

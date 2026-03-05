@@ -16,7 +16,7 @@ export default function CotixToast() {
       setMessage("🌐 Conexión restaurada");
 
     const savedHandler = () =>
-      setMessage("💾 Presupuesto guardado");
+      setMessage("💾 PDF Generado");
 
     window.addEventListener("cotix-update", updateHandler);
     window.addEventListener("cotix-offline", offlineHandler);
