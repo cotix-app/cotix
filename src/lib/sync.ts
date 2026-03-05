@@ -2,35 +2,46 @@ import { supabase } from "./supabase";
 
 export async function syncPresupuestos() {
 
-  const presupuestos = JSON.parse(
-    localStorage.getItem("cotixPresupuestos") || "[]"
-  );
+  try {
 
-  const pendientes = presupuestos.filter((p: any) => !p.synced);
+    const presupuestos = JSON.parse(
+      localStorage.getItem("cotixPresupuestos") || "[]"
+    );
 
-  for (const p of pendientes) {
+    const pendientes = presupuestos.filter((p: any) => !p.synced);
 
-    const { error } = await supabase
-      .from("presupuestos")
-      .insert({
-        id: p.id,
-        cliente_nombre: p.data.cliente.nombre,
-        cliente_telefono: p.data.cliente.telefono,
-        equipo_tipo: p.data.activo.tipo,
-        problemas: p.data.problemas,
-        tareas: p.data.tareas,
-        total: p.data.tareas.reduce(
-          (sum: number, t: any) => sum + Number(t.precio || 0),
-          0
-        )
-      });
+    for (const p of pendientes) {
 
-    if (!error) {
-      p.synced = true;
+      if (!p?.data?.cliente) continue;
+
+      const { error } = await supabase
+        .from("presupuestos")
+        .insert({
+          id: p.id,
+          cliente_nombre: p.data.cliente.nombre || "",
+          cliente_telefono: p.data.cliente.telefono || "",
+          equipo_tipo: p.data.activo?.tipo || "",
+          problemas: p.data.problemas || [],
+          tareas: p.data.tareas || [],
+          total: (p.data.tareas || []).reduce(
+            (sum: number, t: any) => sum + Number(t.precio || 0),
+            0
+          )
+        });
+
+      if (!error) {
+        p.synced = true;
+      }
+
     }
 
-  }
+    localStorage.setItem(
+      "cotixPresupuestos",
+      JSON.stringify(presupuestos)
+    );
 
-  localStorage.setItem("cotixPresupuestos", JSON.stringify(presupuestos));
+  } catch (err) {
+    console.error("Error en syncPresupuestos:", err);
+  }
 
 }

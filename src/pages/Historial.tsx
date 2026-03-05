@@ -2,9 +2,9 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useCotix } from "../context/CotixContext";
 
-export default function Historial() {
-  const navigate = useNavigate();
+export default function Historial() {  
   const { presupuestos, setPresupuestos } = useCotix();
+  const navigate = useNavigate();
 
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [busqueda, setBusqueda] = useState<string>("");

@@ -33,9 +33,9 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <CotixProvider>
-        <AppBoot>
+        
           <App />
-        </AppBoot>
+        
       </CotixProvider>
     </BrowserRouter>
   </React.StrictMode>
