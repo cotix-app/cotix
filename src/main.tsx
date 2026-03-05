@@ -4,11 +4,14 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { CotixProvider } from "./context/CotixContext";
 import "./index.css";
-
+import { syncPresupuestos } from "./lib/sync";
 import { registerSW } from "virtual:pwa-register";
-
 import AppBoot from "./components/AppBoot";
 
+window.addEventListener("online", ()=> {syncPresupuestos});
+if (navigator.onLine){
+  syncPresupuestos();
+}
 window.addEventListener("offline", () => {
   window.dispatchEvent(new Event("cotix-offline"));
 });

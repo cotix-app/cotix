@@ -136,6 +136,7 @@ export default function Resumen() {
       fecha: new Date().toISOString(),
       estado: "pendiente",
       data,
+      synced: false
     };
 
     setPresupuestos([...presupuestos, nuevoPresupuesto]);
@@ -165,7 +166,7 @@ export default function Resumen() {
     });
 
     navigate("/");
-    
+
   };
 
   return (
