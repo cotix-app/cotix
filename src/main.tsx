@@ -5,9 +5,9 @@ import App from "./App";
 import { CotixProvider } from "./context/CotixContext";
 import "./index.css";
 
-import { registerSW } from "virtual:pwa-register/react";
+import { useRegisterSW } from "virtual:pwa-register/react";
 
-const updateSW = registerSW({
+useRegisterSW({
   onNeedRefresh() {
     window.dispatchEvent(new Event("cotix-update"));
   },
