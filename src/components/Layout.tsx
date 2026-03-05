@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useCotix } from "../context/CotixContext";
 import  StepProgress from "./StepProgress";
-import UpdateBanner from "./UpdateBanner";
+import UpdateToast from "./UpdateToast";
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -45,8 +45,9 @@ export default function Layout() {
         <Outlet />
         </div>
       </main>
+      <UpdateToast/>
 
     </div>
   );
 }
-<UpdateBanner/>
+
