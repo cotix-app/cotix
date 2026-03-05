@@ -7,6 +7,8 @@ import "./index.css";
 
 import { registerSW } from "virtual:pwa-register";
 
+import AppBoot from "./components/AppBoot";
+
 registerSW({
   onNeedRefresh() {
     window.dispatchEvent(new Event("cotix-update"));
@@ -20,7 +22,9 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <CotixProvider>
-        <App />
+        <AppBoot>
+          <App />
+        </AppBoot>
       </CotixProvider>
     </BrowserRouter>
   </React.StrictMode>

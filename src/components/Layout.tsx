@@ -40,7 +40,9 @@ export default function Layout() {
 
       {/* Contenido dinámico */}
       <main className="flex-1 relative z-0">
+        <div className="animate-fade">
         <Outlet />
+        </div>
       </main>
 
     </div>
