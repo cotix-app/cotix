@@ -132,8 +132,10 @@ export default function Resumen() {
 
     window.dispatchEvent(new Event("cotix-saved"));
 
-    const nuevoPresupuesto = {
-      id: Date.now().toString(),
+     const id = editingId || crypto.randomUUID();
+    
+     const nuevoPresupuesto = {
+      id: id,
       fecha: new Date().toISOString(),
       estado: "pendiente",
       data,
@@ -161,21 +163,27 @@ export default function Resumen() {
       problemas: [],
       tareas: [],
       config: data.config
+      
     };
 
     setData(nuevoData);
 
     localStorage.setItem("cotixData", JSON.stringify(nuevoData));
 
+       
     // GUARDAR EN SUPABASE
-    await supabase.from("presupuestos").insert({
-      id: crypto.randomUUID(),
+    await supabase
+    .from("presupuestos")
+    .upsert({
+      id:id ,
       cliente_nombre: data.cliente.nombre,
       cliente_telefono: data.cliente.telefono,
       equipo_tipo: data.activo.tipo,
       problemas: data.problemas,
       tareas: data.tareas,
-      total: total
+      total: total,
+      estado: editingId ? presupuestos.find(
+        p=> p.id === editingId)?.estado || "pendiente" : "pendiente"
     });
 
     navigate("/");
