@@ -11,13 +11,13 @@ export function startSessionTimeout() {
     timeout = setTimeout(async () => {
       await logout()
       window.location.href = "/login"
-    }, 1 * 60 * 1000) // 10 minutos
+    }, 60 * 60 * 1000) // 10 minutos
 
   }
 
-  window.addEventListener("mousemove", resetTimer)
-  window.addEventListener("keydown", resetTimer)
-  window.addEventListener("click", resetTimer)
+  const events=
+  ["mousemove","keydown","click","touchstart"]
+   events.forEach(event => window.addEventListener(event,resetTimer))
 
   resetTimer()
 

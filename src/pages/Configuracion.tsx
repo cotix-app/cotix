@@ -1,16 +1,8 @@
 import { useCotix } from "../context/CotixContext";
-import { logout } from "../lib/auth";
-import { useNavigate } from "react-router-dom";
 
-const navigate = useNavigate()
-  const handleLogout = async () => { 
-    await logout()
-    navigate("/login")
-  }
 
 export default function Configuracion() {
   const { data, setData } = useCotix();
-
   
 
   const handleChange = (campo: string, valor: any) => {
@@ -29,11 +21,6 @@ export default function Configuracion() {
         <h2 className="text-xl font-bold text-center">
           Configuración
         </h2>
-        <button
-        onClick={handleLogout}
-        className="bg-red-600 text-white px-4 py-2 rounded">
-          Cerrar Sesion
-        </button>
 
         {/* Empresa */}
         <div>

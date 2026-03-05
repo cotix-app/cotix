@@ -2,11 +2,19 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useCotix } from "../context/CotixContext";
 import  StepProgress from "./StepProgress";
 import CotixToast from "./CotixToast";
+import { logout } from "../lib/auth";
+
+
+
 
 export default function Layout() {
   const navigate = useNavigate();
   const { data } = useCotix();
   const location = useLocation();
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -34,6 +42,13 @@ export default function Layout() {
           >
             Configuración
           </button>
+
+          <button
+          onClick={handleLogout}
+          className="bg-red-600 text-white px-4 py-2 rounded"
+        >
+          Cerrar Sesión
+        </button>
         </div>
       </header>
 

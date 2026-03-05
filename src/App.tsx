@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Layout from "./components/Layout";
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { startSessionTimeout } from "./lib/sessionTimeout";
 
 import Home from "./pages/Home";
 import Cliente from "./pages/Cliente";
@@ -14,9 +15,11 @@ import Configuracion from "./pages/Configuracion";
 import Login from "./pages/Login";
 
 function App() {
+
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
+    startSessionTimeout();
     const timer = setTimeout(() => {
       setShowSplash(false);
     }, 2000);

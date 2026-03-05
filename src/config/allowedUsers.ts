@@ -1,5 +1,5 @@
 export const allowedUsers = [
-  "ruizvillamaria@gmail.com",
+  "miemmtec@gmail.com",
   "tecnico1@gmail.com",
   "tecnico2@gmail.com",
   "tecnico3@gmail.com",
