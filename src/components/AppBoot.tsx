@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 export default function AppBoot({ children }: { children: React.ReactNode }) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [update, setUpdate] = useState(false);
 
   useEffect(() => {
