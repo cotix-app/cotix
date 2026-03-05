@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
       <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-lg text-center space-y-4">
-        <h1 className="text-3xl font-bold text-blue-900">Cotix</h1>
+        <h1 className="text-3xl font-bold text-blue-900">jajajaj</h1>
 
         <p className="text-gray-600">
           Días restantes de prueba: <strong>{diasRestantes}</strong>
