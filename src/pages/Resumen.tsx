@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import { useCotix } from "../context/CotixContext";
+import { supabase } from "../lib/supabase";
 
 export default function Resumen() {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ export default function Resumen() {
 
   const total = data.tareas.reduce((sum, t) => sum + Number(t.precio || 0), 0);
 
-  const generarPDF = () => {
+  const generarPDF = async () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -151,9 +152,19 @@ export default function Resumen() {
     setData(nuevoData);
     localStorage.setItem("cotixData", JSON.stringify(nuevoData));
 
-    navigate("/");
     
 
+    await supabase.from("presupuestos").insert({
+      id: crypto.randomUUID(),
+      cliente_nombre: data.cliente.nombre,
+      cliente_telefono: data.cliente.telefono,
+      equipo_tipo: data.activo.tipo,
+      problemas: data.problemas,
+      tareas: data.tareas,
+      total: total,
+    });
+
+    navigate("/");
   };
 
   return (
@@ -211,7 +222,6 @@ export default function Resumen() {
         >
           Generar PDF
         </button>
-        
       </div>
     </div>
   );
