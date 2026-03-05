@@ -18,7 +18,7 @@ function App() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setShowSplash(false);
+      setShowSplash(true);
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -27,7 +27,7 @@ function App() {
   if (showSplash) {
     return (
       <div className="flex items-center justify-center h-screen bg-blue-700">
-        <img src="/splash.png" alt="Cotix" className="w-72" />
+        <img src="/splash.png" alt="Cotix" className="flex items-center justify-center h-screen" />
       </div>
     );
   }
