@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useCotix } from "../context/CotixContext";
 import  StepProgress from "./StepProgress";
 import UpdateBanner from "./UpdateBanner";
@@ -6,6 +6,7 @@ import UpdateBanner from "./UpdateBanner";
 export default function Layout() {
   const navigate = useNavigate();
   const { data } = useCotix();
+  const location = useLocation();
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -40,7 +41,7 @@ export default function Layout() {
 
       {/* Contenido dinámico */}
       <main className="flex-1 relative z-0">
-        <div className="animate-fade">
+        <div key={location.pathname} className="animate-fade">
         <Outlet />
         </div>
       </main>

@@ -24,10 +24,10 @@ export default function AppBoot({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col items-center gap-4 animate-fade">
           <img
             src="/icon-512.png"
-            className="w-24 h-24 animate-scale"
+            className="w-48 h-48 animate-scale"
           />
 
-          <h1 className="text-white text-2xl font-semibold">
+          <h1 className="text-white text-2xl font-semibold animate-fade">
             Cotix
           </h1>
         </div>
