@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import { useCotix } from "../context/CotixContext";
 import { supabase } from "../lib/supabase";
+import { getUser } from "../lib/auth";
 
 export default function Resumen() {
   const navigate = useNavigate();
@@ -170,12 +171,14 @@ export default function Resumen() {
 
     localStorage.setItem("cotixData", JSON.stringify(nuevoData));
 
-       
+    
     // GUARDAR EN SUPABASE
+     const user = await getUser();  
     await supabase
     .from("presupuestos")
     .upsert({
       id:id ,
+      tecnico_mail: user?.email,
       cliente_nombre: data.cliente.nombre,
       cliente_telefono: data.cliente.telefono,
       equipo_tipo: data.activo.tipo,

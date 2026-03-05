@@ -7,11 +7,36 @@ import "./index.css";
 import { syncPresupuestos } from "./lib/sync";
 import { registerSW } from "virtual:pwa-register";
 import AppBoot from "./components/AppBoot";
+import { supabase } from "./lib/supabase";
 
-window.addEventListener("online", ()=> {syncPresupuestos});
-if (navigator.onLine){
+
+// ---- Sync cuando vuelve internet ----
+window.addEventListener("online", () => {
+  syncPresupuestos();
+});
+
+if (navigator.onLine) {
   syncPresupuestos();
 }
+
+
+// ---- Auto login para testers ----
+async function autoLogin() {
+
+  const email = localStorage.getItem("cotixUser");
+
+  if (!email) return;
+
+  const { data } = await supabase.auth.getSession();
+
+  if (data.session) return;
+
+}
+
+autoLogin();
+
+
+// ---- Eventos online/offline ----
 window.addEventListener("offline", () => {
   window.dispatchEvent(new Event("cotix-offline"));
 });
@@ -20,6 +45,8 @@ window.addEventListener("online", () => {
   window.dispatchEvent(new Event("cotix-online"));
 });
 
+
+// ---- PWA ----
 registerSW({
   onNeedRefresh() {
     window.dispatchEvent(new Event("cotix-update"));
@@ -29,6 +56,8 @@ registerSW({
   }
 });
 
+
+// ---- React ----
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>

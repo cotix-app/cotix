@@ -1,53 +1,72 @@
-import { useState } from "react";
-import { allowedUsers } from "../config/allowedUsers";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react"
+import { login } from "../lib/auth"
+import { useNavigate } from "react-router-dom"
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
 
-  const handleLogin = () => {
-    const emailNormalizado = email.trim().toLowerCase();
+  const navigate = useNavigate()
 
-    if (!allowedUsers.includes(emailNormalizado)) {
-      setError("No estás autorizado para acceder a Cotix.");
-      return;
+  const [email,setEmail] = useState("")
+  const [password,setPassword] = useState("")
+  const [error,setError] = useState("")
+
+  const handleLogin = async () => {
+
+    try {
+
+      await login(email,password)
+
+      navigate("/")
+
+    } catch(e:any){
+
+      setError(e.message)
+
     }
 
-    localStorage.setItem("cotixUser", emailNormalizado);
-    navigate("/");
-  };
-console.log("allowedUsers:", allowedUsers);
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-      <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-md text-center">
-        <h1 className="text-2xl font-bold text-blue-900 mb-6">
-          Acceso Cotix Beta
-        </h1>
+
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+
+      <div className="bg-white p-8 rounded-xl shadow w-80">
+
+        <h2 className="text-xl font-bold mb-4 text-center">
+          Ingresar a Cotix
+        </h2>
 
         <input
           type="email"
-          placeholder="Tu email autorizado"
+          placeholder="Email"
+          className="border p-2 w-full mb-3"
           value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-            setError("");
-          }}
-          className="w-full border p-3 rounded-lg mb-4"
+          onChange={(e)=>setEmail(e.target.value)}
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          className="border p-2 w-full mb-3"
+          value={password}
+          onChange={(e)=>setPassword(e.target.value)}
         />
 
         {error && (
-          <p className="text-red-600 text-sm mb-4">{error}</p>
+          <p className="text-red-500 text-sm mb-2">{error}</p>
         )}
 
         <button
           onClick={handleLogin}
-          className="bg-blue-900 text-white py-3 px-4 rounded-xl w-full"
+          className="bg-blue-700 text-white w-full p-2 rounded"
         >
-          Ingresar
+          Entrar
         </button>
+
       </div>
+
     </div>
-  );
+
+  )
+
 }
