@@ -150,7 +150,7 @@ export default function Tareas() {
       <button
         disabled={tareas.length === 0 || total === 0}
         onClick={() => navigate("/resumen")}
-        className="bg-blue-900 text-white py-3 rounded-xl disabled:opacity-50"
+        className="bg-[#FF7A00] text-white py-3 rounded-xl disabled:opacity-50 hover:bg-blue-800 transition"
       >
         Continuar
       </button>

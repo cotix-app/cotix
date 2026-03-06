@@ -58,7 +58,7 @@ export default function Login() {
 
         <button
           onClick={handleLogin}
-          className="bg-blue-700 text-white w-full p-2 rounded"
+          className="bg-[#FF7A00] text-white font-bold w-full p-2 rounded hover:bg-blue-800 transition"
         >
           Entrar
         </button>

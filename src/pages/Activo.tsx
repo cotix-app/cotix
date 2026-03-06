@@ -73,7 +73,7 @@ export default function Activo() {
 
         <button
           onClick={handleContinuar}
-          className="mt-6 bg-blue-900 text-white py-2 px-4 rounded-xl w-full"
+          className="mt-6 bg-[#FF7A00] text-white py-2 px-4 rounded-xl w-full hover:bg-blue-800 transition"
         >
           Continuar
         </button>

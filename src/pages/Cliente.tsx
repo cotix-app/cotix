@@ -54,7 +54,7 @@ export default function Cliente() {
       <button
         disabled={!nombre}
         onClick={() => navigate("/activo")}
-        className="bg-blue-900 text-white py-3 rounded-xl disabled:opacity-50"
+        className="bg-[#FF7A00] text-white py-3 rounded-xl disabled:opacity-50 hover:bg-blue-800 transition"
       >
         Continuar
       </button>

@@ -279,7 +279,7 @@ export default function Resumen() {
 
         <button
           onClick={generarPDF}
-          className="bg-blue-900 text-white py-3 px-4 rounded-xl w-full text-lg"
+          className="bg-blue-900 text-white py-3 px-4 rounded-xl w-full text-lg hover:bg-orange-400 transition"
         >
           Generar PDF
         </button>

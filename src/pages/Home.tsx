@@ -24,7 +24,7 @@ export default function Home() {
         <div className="flex flex-col gap-3 pt-4">
           <button
             onClick={() => navigate("/cliente")}
-            className="bg-blue-900 text-white py-2 rounded-lg hover:bg-blue-800 transition"
+            className="bg-[#FF7A00] text-black font-bold py-2 rounded-lg hover:bg-blue-800 transition"
           >
             Crear Presupuesto
           </button>
