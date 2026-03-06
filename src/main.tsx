@@ -22,6 +22,13 @@ if (navigator.onLine) {
 // ---------- Realtime listener ----------
 startRealtimePresupuestos();
 
+// refrescar cuando la app vuelve a foco
+window.addEventListener("focus", () => {
+  if (navigator.onLine) {
+    pullPresupuestos();
+  }
+});
+
 window.addEventListener("cotix-refresh", () => {
   if (navigator.onLine) {
     pullPresupuestos();

@@ -1,9 +1,13 @@
 import { supabase } from "./supabase";
 
+let channel: any = null;
+
 export function startRealtimePresupuestos() {
 
-  const channel = supabase
-    .channel("presupuestos-changes")
+  if (channel) return;
+
+  channel = supabase
+    .channel("cotix-presupuestos")
 
     .on(
       "postgres_changes",
@@ -12,10 +16,11 @@ export function startRealtimePresupuestos() {
         schema: "public",
         table: "presupuestos"
       },
-
+      
       () => {
 
-        // Avisar a la app que hay cambios
+        console.log("Realtime update recibido");
+
         window.dispatchEvent(
           new Event("cotix-refresh")
         );
@@ -23,8 +28,20 @@ export function startRealtimePresupuestos() {
       }
     )
 
-    .subscribe();
+    .subscribe((status) => {
 
-  return channel;
+      console.log("Realtime status:", status);
+
+      if (status === "CHANNEL_ERROR") {
+
+        console.log("Reconectando realtime...");
+
+        setTimeout(() => {
+          startRealtimePresupuestos();
+        }, 2000);
+
+      }
+
+    });
 
 }
