@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useCotix } from "../context/CotixContext";
 import { guardarConfig } from "../lib/configSync";
 
@@ -5,26 +6,35 @@ export default function Configuracion() {
 
   const { data, setData } = useCotix();
 
-  const handleChange = (campo: string, valor: any) => {
+  const [configLocal, setConfigLocal] = useState(data.config);
 
-    const nuevaConfig = {
-      ...data.config,
+  const handleChange = (campo: string, valor: any) => {
+    setConfigLocal({
+      ...configLocal,
       [campo]: valor
+    });
+  };
+
+  const guardar = async () => {
+
+    const nuevoData = {
+      ...data,
+      config: configLocal
     };
 
-    setData({
-      ...data,
-      config: nuevaConfig
-    });
+    setData(nuevoData);
 
-    // 🔵 sync a Supabase
-    guardarConfig(nuevaConfig);
+    await guardarConfig(configLocal);
+
+    alert("Configuración guardada");
 
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
+
       <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-md space-y-4">
+
         <h2 className="text-xl font-bold text-center">
           Configuración
         </h2>
@@ -37,7 +47,7 @@ export default function Configuracion() {
 
           <input
             type="text"
-            value={data.config.empresa}
+            value={configLocal.empresa}
             onChange={(e) =>
               handleChange("empresa", e.target.value.toUpperCase())
             }
@@ -45,17 +55,19 @@ export default function Configuracion() {
           />
         </div>
 
-        {/* Mostrar Fecha */}
+        {/* Mostrar fecha */}
         <div className="flex items-center justify-between">
+
           <span>Mostrar fecha en PDF</span>
 
           <input
             type="checkbox"
-            checked={data.config.mostrarFechaHora}
+            checked={configLocal.mostrarFechaHora}
             onChange={(e) =>
               handleChange("mostrarFechaHora", e.target.checked)
             }
           />
+
         </div>
 
         {/* Validez */}
@@ -67,7 +79,7 @@ export default function Configuracion() {
           <input
             type="number"
             min="0"
-            value={data.config.validezDias}
+            value={configLocal.validezDias}
             onChange={(e) =>
               handleChange(
                 "validezDias",
@@ -78,7 +90,18 @@ export default function Configuracion() {
           />
         </div>
 
+
+        {/* BOTÓN GUARDAR */}
+
+        <button
+          onClick={guardar}
+          className="w-full bg-[#FF7A00] text-white py-2 rounded-lg mt-4"
+        >
+          Guardar configuración
+        </button>
+
       </div>
+
     </div>
   );
 }
