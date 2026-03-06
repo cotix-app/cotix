@@ -26,22 +26,17 @@ type PlanType = "free" | "pro";
 type CotixContextType = {
   data: CotixData;
   setData: React.Dispatch<React.SetStateAction<CotixData>>;
-
   presupuestos: Presupuesto[];
   setPresupuestos: React.Dispatch<React.SetStateAction<Presupuesto[]>>;
-
   trialInicio: string;
   trialActivo: boolean;
   diasRestantes: number;
-
   presupuestosHoy: number;
   limiteDiario: number;
-
   plan: PlanType;
   puedeCrearHoy: boolean;
   registrarCreacionHoy: () => void;
   activarPro: () => void;
-
   editingId: string | null;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
 };
@@ -49,6 +44,7 @@ type CotixContextType = {
 const CotixContext = createContext<CotixContextType | undefined>(undefined);
 
 export function CotixProvider({ children }: { children: React.ReactNode }) {
+
   const [plan, setPlan] = useState<PlanType>(() => {
     return (localStorage.getItem("cotixPlan") as PlanType) || "free";
   });
@@ -88,6 +84,7 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
     return hoy;
   });
 
+  // ---------- Guardar local ----------
   useEffect(() => {
     localStorage.setItem("cotixData", JSON.stringify(data));
   }, [data]);
@@ -100,9 +97,15 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("cotixPlan", plan);
   }, [plan]);
 
+
+
+  // ---------- REFRESH PRESUPUESTOS ----------
   useEffect(() => {
+
     const handler = async () => {
+
       try {
+
         const { data: rows } = await supabase
           .from("presupuestos")
           .select("*")
@@ -124,18 +127,16 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
             },
             problemas: p.problemas || [],
             tareas: p.tareas || [],
-            config: {
-              empresa: data.config.empresa,
-              mostrarFechaHora: data.config.mostrarFechaHora,
-              validezDias: data.config.validezDias,
-            },
+            config: data.config,
           },
         }));
 
         setPresupuestos(formateados);
+
       } catch (err) {
         console.error("Error refrescando presupuestos", err);
       }
+
     };
 
     window.addEventListener("cotix-refresh", handler);
@@ -143,9 +144,50 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
     return () => {
       window.removeEventListener("cotix-refresh", handler);
     };
+
   }, [data.config]);
 
+
+
+  // ---------- CONFIG SYNC ----------
   useEffect(() => {
+
+    const cargarConfig = async () => {
+
+      try {
+
+        const { data: session } = await supabase.auth.getSession();
+        const email = session.session?.user?.email;
+
+        if (!email) return;
+
+        const { data: config } = await supabase
+          .from("config_usuario")
+          .select("*")
+          .eq("email", email)
+          .single();
+
+        if (!config) return;
+
+        setData((prev) => ({
+          ...prev,
+          config: {
+            empresa: config.empresa,
+            mostrarFechaHora: config.mostrar_fecha,
+            validezDias: config.validez_dias,
+          },
+        }));
+
+      } catch (err) {
+        console.error("Error cargando config:", err);
+      }
+
+    };
+
+    // cargar config al iniciar
+    cargarConfig();
+
+    // realtime
     const channel = supabase
       .channel("config-sync")
       .on(
@@ -155,32 +197,8 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
           schema: "public",
           table: "config_usuario",
         },
-        async () => {
-          try {
-            const { data: session } = await supabase.auth.getSession();
-            const email = session.session?.user?.email;
-
-            if (!email) return;
-
-            const { data: config } = await supabase
-              .from("config_usuario")
-              .select("*")
-              .eq("email", email)
-              .single();
-
-            if (!config) return;
-
-            setData((prev) => ({
-              ...prev,
-              config: {
-                empresa: config.empresa,
-                mostrarFechaHora: config.mostrar_fecha,
-                validezDias: config.validez_dias,
-              },
-            }));
-          } catch (err) {
-            console.error("Error sync config:", err);
-          }
+        () => {
+          cargarConfig();
         }
       )
       .subscribe();
@@ -188,43 +206,63 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
     return () => {
       supabase.removeChannel(channel);
     };
+
   }, []);
 
+
+
+  // ---------- TRIAL ----------
   const inicio = new Date(trialInicio).getTime();
   const ahora = new Date().getTime();
 
   const diasPasados = Math.floor((ahora - inicio) / (1000 * 60 * 60 * 24));
-
   const diasRestantes = Math.max(15 - diasPasados, 0);
-
   const trialActivo = plan === "free" && diasRestantes > 0;
 
+
+
+  // ---------- REGISTRO DIARIO ----------
   const hoy = new Date().toISOString().split("T")[0];
 
-  const registro = JSON.parse(localStorage.getItem("cotixRegistroDiario") || "{}");
+  const registro = JSON.parse(
+    localStorage.getItem("cotixRegistroDiario") || "{}"
+  );
 
   const presupuestosHoy: number = registro[hoy] || 0;
-
   const limiteDiario: number = plan === "pro" ? Infinity : 2;
 
   const puedeCrearHoy: boolean =
-    plan === "pro" ? true : trialActivo && presupuestosHoy < limiteDiario;
+    plan === "pro"
+      ? true
+      : trialActivo && presupuestosHoy < limiteDiario;
+
+
 
   const registrarCreacionHoy = () => {
+
     if (plan === "pro") return;
 
     const registroActual = JSON.parse(
       localStorage.getItem("cotixRegistroDiario") || "{}"
     );
 
-    registroActual[hoy] = (registroActual[hoy] || 0) + 1;
+    registroActual[hoy] =
+      (registroActual[hoy] || 0) + 1;
 
-    localStorage.setItem("cotixRegistroDiario", JSON.stringify(registroActual));
+    localStorage.setItem(
+      "cotixRegistroDiario",
+      JSON.stringify(registroActual)
+    );
+
   };
+
+
 
   const activarPro = () => {
     setPlan("pro");
   };
+
+
 
   return (
     <CotixContext.Provider
@@ -252,6 +290,7 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useCotix() {
+
   const context = useContext(CotixContext);
 
   if (!context) {
@@ -259,4 +298,5 @@ export function useCotix() {
   }
 
   return context;
+
 }
