@@ -23,7 +23,6 @@ export default function Resumen() {
     0
   );
 
-
   const generarPDF = async () => {
 
     const doc = new jsPDF();
@@ -33,15 +32,35 @@ export default function Resumen() {
 
     let y = 25;
 
-
     // HEADER
     doc.setFillColor(25,45,85);
     doc.rect(0,0,pageWidth,40,"F");
 
+    // ---------- LOGO ----------
+    if(data.config.logo_url){
+
+      try{
+
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = data.config.logo_url;
+
+        await new Promise((resolve)=>{
+          img.onload = resolve;
+        });
+
+        doc.addImage(img,"PNG",10,8,25,25);
+
+      }catch(e){
+        console.log("logo no cargado");
+      }
+
+    }
+
     doc.setTextColor(255,255,255);
     doc.setFont("helvetica","bold");
     doc.setFontSize(18);
-    doc.text(data.config.empresa || "SERVICIO TÉCNICO",20,25);
+    doc.text(data.config.empresa || "SERVICIO TÉCNICO",45,25);
 
     doc.setFontSize(12);
     doc.text("PRESUPUESTO",pageWidth-20,20,{align:"right"});
@@ -53,7 +72,6 @@ export default function Resumen() {
     doc.setFont("helvetica","normal");
 
     y = 55;
-
 
     // CLIENTE
     doc.setFontSize(12);
@@ -72,7 +90,6 @@ export default function Resumen() {
 
     y += 15;
 
-
     // HEADER TABLA
     doc.setFillColor(240,240,240);
     doc.rect(20,y-7,pageWidth-40,10,"F");
@@ -81,7 +98,6 @@ export default function Resumen() {
     doc.text("Precio",pageWidth-25,y,{align:"right"});
 
     y += 12;
-
 
     // TAREAS
     data.tareas.forEach((t,index)=>{
@@ -111,7 +127,6 @@ export default function Resumen() {
 
     });
 
-
     // BLOQUE TOTAL
     const bloqueFinalY = pageHeight - 40;
 
@@ -133,11 +148,9 @@ export default function Resumen() {
     doc.setTextColor(150);
     doc.text("Generado con Cotix-App",pageWidth/2,pageHeight-5,{align:"center"});
 
-
     doc.save(`${data.cliente.nombre}_Presupuesto.pdf`);
 
     window.dispatchEvent(new Event("cotix-saved"));
-
 
     const id = editingId || crypto.randomUUID();
 
@@ -147,7 +160,6 @@ export default function Resumen() {
       ? presupuestos.find(p => p.id === editingId)?.estado || "pendiente"
       : "pendiente";
 
-
     const nuevoPresupuesto = {
       id,
       fecha,
@@ -155,7 +167,6 @@ export default function Resumen() {
       data,
       synced:false
     };
-
 
     // EDITAR O CREAR LOCAL
     if(editingId){
@@ -174,11 +185,9 @@ export default function Resumen() {
 
     }
 
-
     setEditingId(null);
 
     registrarCreacionHoy();
-
 
     const nuevoData = {
       cliente:{nombre:"",telefono:""},
@@ -191,7 +200,6 @@ export default function Resumen() {
     setData(nuevoData);
 
     localStorage.setItem("cotixData",JSON.stringify(nuevoData));
-
 
     // GUARDAR EN SUPABASE
     const user = await getUser();
@@ -211,11 +219,9 @@ export default function Resumen() {
         fecha
       });
 
-
     navigate("/");
 
   };
-
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -227,19 +233,16 @@ export default function Resumen() {
         ← Volver
       </button>
 
-
       <div className="bg-white p-10 rounded-xl shadow-xl max-w-2xl mx-auto">
 
         <h2 className="text-3xl font-bold text-blue-900 text-center mb-10">
           Resumen del Presupuesto
         </h2>
 
-
         <div className="mb-6 text-lg space-y-1">
           <p><strong>Cliente:</strong> {data.cliente.nombre}</p>
           <p><strong>Equipo:</strong> {data.activo.tipo}</p>
         </div>
-
 
         <div className="mb-10">
 
@@ -271,11 +274,9 @@ export default function Resumen() {
 
         </div>
 
-
         <div className="text-right text-3xl font-bold text-blue-900 mb-10">
           TOTAL: ${total}
         </div>
-
 
         <button
           onClick={generarPDF}

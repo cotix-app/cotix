@@ -6,10 +6,12 @@ export type CotixData = {
   activo: { tipo: string };
   problemas: string[];
   tareas: { descripcion: string; detalle?: string; precio: number }[];
+
   config: {
     empresa: string;
     mostrarFechaHora: boolean;
     validezDias: number;
+    logo_url: string;
   };
 };
 
@@ -59,10 +61,12 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
           activo: { tipo: "" },
           problemas: [],
           tareas: [],
+
           config: {
             empresa: "SERVICIO TÉCNICO",
             mostrarFechaHora: true,
             validezDias: 15,
+            logo_url: ""
           },
         };
   });
@@ -171,10 +175,12 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
 
         setData((prev) => ({
           ...prev,
+
           config: {
             empresa: config.empresa,
             mostrarFechaHora: config.mostrar_fecha,
             validezDias: config.validez_dias,
+            logo_url: config.logo_url || ""
           },
         }));
 

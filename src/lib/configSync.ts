@@ -1,8 +1,7 @@
 import { supabase } from "./supabase";
 import { getUser } from "./auth";
 
-export async function 
-guardarConfig(config:any){
+export async function guardarConfig(config:any){
 
   const user = await getUser();
   
@@ -14,7 +13,8 @@ guardarConfig(config:any){
       email: user.email,
       empresa: config.empresa,
       mostrar_fecha: config.mostrarFechaHora,
-      validez_dias: config.validezDias
+      validez_dias: config.validezDias,
+      logo_url: config.logo_url || null
     });
 
 }
