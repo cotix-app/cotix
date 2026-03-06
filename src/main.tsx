@@ -7,11 +7,11 @@ import "./index.css";
 
 import { syncPresupuestos } from "./lib/sync";
 import { pullPresupuestos } from "./lib/pullPresupuestos";
+import { startRealtimePresupuestos } from "./lib/realtime";
 
 import { registerSW } from "virtual:pwa-register";
 import AppBoot from "./components/AppBoot";
 import { supabase } from "./lib/supabase";
-
 
 // ---------- Sync inicial ----------
 if (navigator.onLine) {
@@ -19,27 +19,29 @@ if (navigator.onLine) {
   pullPresupuestos();
 }
 
+// ---------- Realtime listener ----------
+startRealtimePresupuestos();
+
+window.addEventListener("cotix-refresh", () => {
+  if (navigator.onLine) {
+    pullPresupuestos();
+  }
+});
 
 // ---------- Sync cuando vuelve internet ----------
 window.addEventListener("online", () => {
-
   syncPresupuestos();
   pullPresupuestos();
-
   window.dispatchEvent(new Event("cotix-online"));
-
 });
-
 
 // ---------- Evento offline ----------
 window.addEventListener("offline", () => {
   window.dispatchEvent(new Event("cotix-offline"));
 });
 
-
 // ---------- Auto login testers ----------
 async function autoLogin() {
-
   const email = localStorage.getItem("cotixUser");
 
   if (!email) return;
@@ -47,11 +49,9 @@ async function autoLogin() {
   const { data } = await supabase.auth.getSession();
 
   if (data.session) return;
-
 }
 
 autoLogin();
-
 
 // ---------- PWA ----------
 registerSW({
@@ -62,7 +62,6 @@ registerSW({
     console.log("Cotix lista para uso offline");
   }
 });
-
 
 // ---------- React ----------
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
