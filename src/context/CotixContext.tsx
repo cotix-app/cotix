@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
 
 export type CotixData = {
   cliente: { nombre: string; telefono: string };
   activo: { tipo: string };
   problemas: string[];
-  tareas: { descripcion: string; detalle?: string;  precio: number }[];
+  tareas: { descripcion: string; detalle?: string; precio: number }[];
   config: {
     empresa: string;
     mostrarFechaHora: boolean;
@@ -41,20 +42,21 @@ type CotixContextType = {
   registrarCreacionHoy: () => void;
   activarPro: () => void;
 
-  editingId: string | null
-  setEditingId:
-  React.Dispatch<React.SetStateAction<string | null >>
+  editingId: string | null;
+  setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 const CotixContext = createContext<CotixContextType | undefined>(undefined);
 
 export function CotixProvider({ children }: { children: React.ReactNode }) {
+
   const [plan, setPlan] = useState<PlanType>(() => {
     return (localStorage.getItem("cotixPlan") as PlanType) || "free";
   });
 
   const [data, setData] = useState<CotixData>(() => {
     const stored = localStorage.getItem("cotixData");
+
     return stored
       ? JSON.parse(stored)
       : {
@@ -79,6 +81,7 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
 
   const [trialInicio] = useState<string>(() => {
     const stored = localStorage.getItem("cotixTrialInicio");
+
     if (stored) return stored;
 
     const hoy = new Date().toISOString();
@@ -86,6 +89,7 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
     return hoy;
   });
 
+  // ---------- Guardar en localStorage ----------
   useEffect(() => {
     localStorage.setItem("cotixData", JSON.stringify(data));
   }, [data]);
@@ -98,80 +102,145 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("cotixPlan", plan);
   }, [plan]);
 
-  // 🔥 Cálculo días restantes
-const inicio = new Date(trialInicio).getTime();
-const ahora = new Date().getTime();
-const diasPasados = Math.floor(
-  (ahora - inicio) / (1000 * 60 * 60 * 24)
-);
+  // ---------- 🔥 REALTIME REFRESH ----------
+  useEffect(() => {
 
-const diasRestantes = Math.max(15 - diasPasados, 0);
-const trialActivo = plan === "free" && diasRestantes > 0;
+    const handler = async () => {
 
-// 🔥 Registro diario
-const hoy = new Date().toISOString().split("T")[0];
-const registro = JSON.parse(
-  localStorage.getItem("cotixRegistroDiario") || "{}"
-);
+      try {
 
-const presupuestosHoy: number = registro[hoy] || 0;
+        const { data: rows } = await supabase
+          .from("presupuestos")
+          .select("*")
+          .order("fecha", { ascending: false });
 
-const limiteDiario: number =
-  plan === "pro" ? Infinity : 2;
+        if (!rows) return;
 
-const puedeCrearHoy: boolean =
-  plan === "pro"
-    ? true
-    : trialActivo && presupuestosHoy < limiteDiario;
+        const formateados: Presupuesto[] = rows.map((p: any) => ({
+          id: p.id,
+          fecha: p.fecha,
+          estado: p.estado || "pendiente",
+          data: {
+            cliente: {
+              nombre: p.cliente_nombre,
+              telefono: p.cliente_telefono
+            },
+            activo: {
+              tipo: p.equipo_tipo
+            },
+            problemas: p.problemas || [],
+            tareas: p.tareas || [],
+            config: {
+              empresa: data.config.empresa,
+              mostrarFechaHora: data.config.mostrarFechaHora,
+              validezDias: data.config.validezDias
+            }
+          }
+        }));
 
-const registrarCreacionHoy = () => {
-  if (plan === "pro") return;
+        setPresupuestos(formateados);
 
-  const registroActual = JSON.parse(
+      } catch (err) {
+
+        console.error("Error refrescando presupuestos", err);
+
+      }
+
+    };
+
+    window.addEventListener("cotix-refresh", handler);
+
+    return () => {
+      window.removeEventListener("cotix-refresh", handler);
+    };
+
+  }, [data.config]);
+
+  // ---------- TRIAL ----------
+  const inicio = new Date(trialInicio).getTime();
+  const ahora = new Date().getTime();
+
+  const diasPasados = Math.floor(
+    (ahora - inicio) / (1000 * 60 * 60 * 24)
+  );
+
+  const diasRestantes = Math.max(15 - diasPasados, 0);
+
+  const trialActivo =
+    plan === "free" && diasRestantes > 0;
+
+  // ---------- REGISTRO DIARIO ----------
+  const hoy = new Date().toISOString().split("T")[0];
+
+  const registro = JSON.parse(
     localStorage.getItem("cotixRegistroDiario") || "{}"
   );
 
-  registroActual[hoy] = (registroActual[hoy] || 0) + 1;
+  const presupuestosHoy: number = registro[hoy] || 0;
 
-  localStorage.setItem(
-    "cotixRegistroDiario",
-    JSON.stringify(registroActual)
-  );
-};
+  const limiteDiario: number =
+    plan === "pro" ? Infinity : 2;
 
- 
-const activarPro = () => {
-  setPlan("pro");
-};
+  const puedeCrearHoy: boolean =
+    plan === "pro"
+      ? true
+      : trialActivo && presupuestosHoy < limiteDiario;
+
+  const registrarCreacionHoy = () => {
+
+    if (plan === "pro") return;
+
+    const registroActual = JSON.parse(
+      localStorage.getItem("cotixRegistroDiario") || "{}"
+    );
+
+    registroActual[hoy] =
+      (registroActual[hoy] || 0) + 1;
+
+    localStorage.setItem(
+      "cotixRegistroDiario",
+      JSON.stringify(registroActual)
+    );
+
+  };
+
+  const activarPro = () => {
+    setPlan("pro");
+  };
+
   return (
     <CotixContext.Provider
-  value={{
-    data,
-    setData,
-    presupuestos,
-    setPresupuestos,
-    trialInicio,
-    trialActivo,
-    diasRestantes,
-    presupuestosHoy,
-    limiteDiario,
-    plan,
-    puedeCrearHoy,
-    registrarCreacionHoy,
-    activarPro,
-    editingId,
-    setEditingId
-  }}
->
-  {children}
-</CotixContext.Provider>
+      value={{
+        data,
+        setData,
+        presupuestos,
+        setPresupuestos,
+        trialInicio,
+        trialActivo,
+        diasRestantes,
+        presupuestosHoy,
+        limiteDiario,
+        plan,
+        puedeCrearHoy,
+        registrarCreacionHoy,
+        activarPro,
+        editingId,
+        setEditingId
+      }}
+    >
+      {children}
+    </CotixContext.Provider>
   );
 }
 
 export function useCotix() {
+
   const context = useContext(CotixContext);
+
   if (!context) {
     throw new Error("useCotix debe usarse dentro de CotixProvider");
   }
+
   return context;
+
 }
