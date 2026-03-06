@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useCotix } from "../context/CotixContext";
+import { supabase } from "../lib/supabase";
 
 export default function Historial() {
   const { presupuestos, setPresupuestos } = useCotix();
@@ -9,10 +10,18 @@ export default function Historial() {
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [busqueda, setBusqueda] = useState<string>("");
 
-  const eliminarPresupuesto = (id: string) => {
-    const nuevos = presupuestos.filter((p) => p.id !== id);
-    setPresupuestos(nuevos);
-  };
+  const eliminarPresupuesto = async (id: string) => {
+
+  const nuevos = presupuestos.filter((p) => p.id !== id);
+  setPresupuestos(nuevos);
+
+  await supabase
+    .from("presupuestos")
+    .delete()
+    .eq("id", id);
+
+};
+
   const { setData, setEditingId } = useCotix();
 
   const editarPresupuesto = (presupuesto: any) => {
@@ -21,12 +30,20 @@ export default function Historial() {
     navigate("/cliente");
   };
 
-  const cambiarEstado = (id: string, nuevoEstado: string) => {
-    const actualizados = presupuestos.map((p) =>
-      p.id === id ? { ...p, estado: nuevoEstado } : p,
-    );
-    setPresupuestos(actualizados);
-  };
+ const cambiarEstado = async (id: string, nuevoEstado: string) => {
+
+  const actualizados = presupuestos.map((p) =>
+    p.id === id ? { ...p, estado: nuevoEstado } : p
+  );
+
+  setPresupuestos(actualizados);
+
+  await supabase
+    .from("presupuestos")
+    .update({ estado: nuevoEstado })
+    .eq("id", id);
+
+};
 
   const getEstadoColor = (estado: string) => {
     switch (estado) {
