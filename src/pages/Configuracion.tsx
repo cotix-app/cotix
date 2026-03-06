@@ -1,18 +1,25 @@
 import { useCotix } from "../context/CotixContext";
-
+import { guardarConfig } from "../lib/configSync";
 
 export default function Configuracion() {
+
   const { data, setData } = useCotix();
-  
 
   const handleChange = (campo: string, valor: any) => {
+
+    const nuevaConfig = {
+      ...data.config,
+      [campo]: valor
+    };
+
     setData({
       ...data,
-      config: {
-        ...data.config,
-        [campo]: valor,
-      },
+      config: nuevaConfig
     });
+
+    // 🔵 sync a Supabase
+    guardarConfig(nuevaConfig);
+
   };
 
   return (
@@ -27,6 +34,7 @@ export default function Configuracion() {
           <label className="block text-sm font-medium">
             Nombre de empresa
           </label>
+
           <input
             type="text"
             value={data.config.empresa}
@@ -40,6 +48,7 @@ export default function Configuracion() {
         {/* Mostrar Fecha */}
         <div className="flex items-center justify-between">
           <span>Mostrar fecha en PDF</span>
+
           <input
             type="checkbox"
             checked={data.config.mostrarFechaHora}
@@ -54,6 +63,7 @@ export default function Configuracion() {
           <label className="block text-sm font-medium">
             Días de validez
           </label>
+
           <input
             type="number"
             min="0"
@@ -67,6 +77,7 @@ export default function Configuracion() {
             className="w-full border p-2 rounded mt-1"
           />
         </div>
+
       </div>
     </div>
   );
