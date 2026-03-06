@@ -10,15 +10,21 @@ export default function Historial() {
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [busqueda, setBusqueda] = useState<string>("");
 
-  const eliminarPresupuesto = async (id: string) => {
+ const eliminarPresupuesto = async (id: string) => {
 
+  // eliminar en React
   const nuevos = presupuestos.filter((p) => p.id !== id);
   setPresupuestos(nuevos);
 
-  await supabase
+  // eliminar en Supabase
+  const { error } = await supabase
     .from("presupuestos")
     .delete()
     .eq("id", id);
+
+  if (error) {
+    console.error("Error eliminando en Supabase:", error);
+  }
 
 };
 
