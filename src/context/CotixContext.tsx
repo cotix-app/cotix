@@ -17,6 +17,7 @@ export type Presupuesto = {
   fecha: string;
   estado: string;
   data: CotixData;
+  synced?: boolean;
 };
 
 type PlanType = "free" | "pro";
