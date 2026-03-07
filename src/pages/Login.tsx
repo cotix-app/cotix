@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { login } from "../lib/auth"
 import { useNavigate } from "react-router-dom"
+import { supabase } from "../lib/supabase"
 
 export default function Login() {
 
@@ -22,7 +23,26 @@ export default function Login() {
 
       await login(email,password)
 
-      navigate("/")
+      const { data: sessionData } = await supabase.auth.getUser()
+
+      const user = sessionData?.user
+
+      if(!user){
+        navigate("/")
+        return
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single()
+
+      if(profile?.role === "admin"){
+        navigate("/admin")
+      } else {
+        navigate("/")
+      }
 
     } catch(e:any){
 
