@@ -1,337 +1,312 @@
-import { useEffect, useState } from "react"
-import { supabase } from "../lib/supabase"
-import { logout } from "../lib/auth"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
+import { logout } from "../lib/auth";
+import { useNavigate } from "react-router-dom";
 
 import {
-LineChart,
-Line,
-XAxis,
-YAxis,
-Tooltip,
-ResponsiveContainer
-} from "recharts"
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
-export default function AdminDashboard(){
+export default function AdminDashboard() {
 
-const navigate = useNavigate()
+  const navigate = useNavigate();
 
-const [data,setData] = useState<any[]>([])
-const [stats,setStats] = useState<any>({})
-const [chart,setChart] = useState<any[]>([])
-const [ranking,setRanking] = useState<any[]>([])
-const [clientes,setClientes] = useState<any[]>([])
-const [recent,setRecent] = useState<any[]>([])
+  const [stats, setStats] = useState<any>({});
+  const [chart, setChart] = useState<any[]>([]);
+  const [ranking, setRanking] = useState<any[]>([]);
+  const [clientes, setClientes] = useState<any[]>([]);
+  const [recent, setRecent] = useState<any[]>([]);
 
-useEffect(()=>{
-cargar()
-},[])
+  useEffect(() => {
+    cargar();
+  }, []);
 
-const handleLogout = async()=>{
-await logout()
-navigate("/login")
-}
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
 
-const cargar = async()=>{
+  const cargar = async () => {
 
-const { data } = await supabase
-.from("presupuestos")
-.select("*")
-.order("fecha",{ascending:false})
+    const { data } = await supabase
+      .from("presupuestos")
+      .select("*")
+      .order("fecha", { ascending: false });
 
-if(!data) return
+    if (!data) return;
 
-setData(data)
+    const hoy = new Date();
+    const hoyStr = hoy.toISOString().split("T")[0];
+    const mesActual = hoy.getMonth();
+    const anioActual = hoy.getFullYear();
 
-const hoy = new Date()
-const hoyStr = hoy.toISOString().split("T")[0]
-const mesActual = hoy.getMonth()
-const anioActual = hoy.getFullYear()
+    const total = data.length;
 
-const total = data.length
+    const hoyCount = data.filter((p:any)=>
+      p.fecha?.startsWith(hoyStr)
+    ).length;
 
-const hoyCount = data.filter((p:any)=>
-p.fecha?.startsWith(hoyStr)
-).length
+    const aprobados = data.filter((p:any)=>p.estado==="aprobado");
+    const rechazados = data.filter((p:any)=>p.estado==="rechazado");
 
-const aprobados = data.filter((p:any)=>p.estado==="aprobado")
-const rechazados = data.filter((p:any)=>p.estado==="rechazado")
+    const ingresos = aprobados.reduce(
+      (sum:number,p:any)=>sum + Number(p.total || 0),
+      0
+    );
 
-const ingresos = aprobados.reduce(
-(sum:number,p:any)=>sum + Number(p.total || 0),0
-)
+    const ticketPromedio = aprobados.length
+      ? Math.round(ingresos / aprobados.length)
+      : 0;
 
-const ticketPromedio = aprobados.length
-? Math.round(ingresos / aprobados.length)
-:0
+    const esteMes = data.filter((p:any)=>{
+      const f = new Date(p.fecha);
+      return (
+        f.getMonth() === mesActual &&
+        f.getFullYear() === anioActual
+      );
+    }).length;
 
-const esteMes = data.filter((p:any)=>{
-const f = new Date(p.fecha)
-return f.getMonth()===mesActual && f.getFullYear()===anioActual
-}).length
+    setStats({
+      total,
+      hoy:hoyCount,
+      aprobados:aprobados.length,
+      rechazados:rechazados.length,
+      ingresos,
+      ticketPromedio,
+      esteMes
+    });
 
-setStats({
-total,
-hoy:hoyCount,
-aprobados:aprobados.length,
-rechazados:rechazados.length,
-ingresos,
-ticketPromedio,
-esteMes
-})
+    const dias:any = {};
 
-/* gráfico */
+    data.forEach((p:any)=>{
 
-const dias:any={}
+      const key = new Date(p.fecha)
+        .toISOString()
+        .split("T")[0];
 
-data.forEach((p:any)=>{
+      if(!dias[key]) dias[key]=0;
 
-const key = new Date(p.fecha)
-.toISOString()
-.split("T")[0]
+      dias[key]++;
 
-if(!dias[key]) dias[key]=0
+    });
 
-dias[key]++
+    const chartData = Object.entries(dias)
+      .map(([date,total])=>({date,total}))
+      .slice(-30);
 
-})
+    setChart(chartData);
 
-const chartData = Object.entries(dias)
-.map(([date,total])=>({date,total}))
-.slice(-30)
+    const tech:any = {};
 
-setChart(chartData)
+    data.forEach((p:any)=>{
 
-/* ranking técnicos */
+      const mail = p.tecnico_mail || "desconocido";
 
-const tech:any={}
+      if(!tech[mail]){
 
-data.forEach((p:any)=>{
+        tech[mail]={
+          total:0,
+          ingresos:0
+        };
 
-const mail = p.tecnico_mail || "desconocido"
+      }
 
-if(!tech[mail]){
-tech[mail]={total:0,ingresos:0}
-}
+      tech[mail].total++;
 
-tech[mail].total++
+      if(p.estado==="aprobado"){
 
-if(p.estado==="aprobado"){
-tech[mail].ingresos+=Number(p.total || 0)
-}
+        tech[mail].ingresos+=Number(p.total || 0);
 
-})
+      }
 
-const rankingTech = Object.entries(tech)
-.map(([mail,val]:any)=>({
-mail,
-total:val.total,
-ingresos:val.ingresos
-}))
-.sort((a:any,b:any)=>b.total-a.total)
+    });
 
-setRanking(rankingTech.slice(0,5))
+    const rankingTech = Object.entries(tech)
+      .map(([mail,val]:any)=>({
+        mail,
+        total:val.total,
+        ingresos:val.ingresos
+      }))
+      .sort((a:any,b:any)=>b.total-a.total);
 
-/* ranking clientes */
+    setRanking(rankingTech.slice(0,5));
 
-const clientesMap:any={}
+    const clientesMap:any = {};
 
-data.forEach((p:any)=>{
+    data.forEach((p:any)=>{
 
-const cliente = p.cliente_nombre || "desconocido"
+      const cliente = p.cliente_nombre || "desconocido";
 
-if(!clientesMap[cliente]){
-clientesMap[cliente]=0
-}
+      if(!clientesMap[cliente]){
+        clientesMap[cliente]=0;
+      }
 
-clientesMap[cliente]+=Number(p.total || 0)
+      clientesMap[cliente]+=Number(p.total || 0);
 
-})
+    });
 
-const topClientes = Object.entries(clientesMap)
-.map(([cliente,total])=>({cliente,total}))
-.sort((a:any,b:any)=>b.total-a.total)
+    const topClientes = Object.entries(clientesMap)
+      .map(([cliente,total])=>({cliente,total}))
+      .sort((a:any,b:any)=>b.total-a.total);
 
-setClientes(topClientes.slice(0,5))
+    setClientes(topClientes.slice(0,5));
 
-/* actividad */
+    setRecent(data.slice(0,8));
 
-setRecent(data.slice(0,8))
+  };
 
-}
+  return (
 
-return(
+    <div className="flex min-h-screen bg-[#0f172a] text-white">
 
-<div className="flex min-h-screen bg-[#0f172a] text-white">
+      <div className="flex-1 p-8">
 
-{/* SIDEBAR */}
+        <div className="flex justify-between items-center mb-8">
 
-<div className="w-64 bg-black p-6 flex flex-col">
+          <h1 className="text-2xl font-bold">
+            Admin Dashboard
+          </h1>
 
-<h1 className="text-xl font-bold mb-8 text-orange-400">
-Cotix
-</h1>
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm"
+          >
+            Cerrar sesión
+          </button>
 
-<nav className="space-y-4 text-sm">
+        </div>
 
-<div>Dashboard</div>
-<div>Empresas</div>
-<div>Técnicos</div>
-<div>Historial</div>
-<div>Configuración</div>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-6 mb-10">
 
-</nav>
+          <KPI title="Total" value={stats.total}/>
+          <KPI title="Hoy" value={stats.hoy}/>
+          <KPI title="Este mes" value={stats.esteMes}/>
+          <KPI title="Aprobados" value={stats.aprobados}/>
+          <KPI title="Ingresos" value={`$${stats.ingresos?.toLocaleString()}`}/>
+          <KPI title="Ticket prom." value={`$${stats.ticketPromedio?.toLocaleString()}`}/>
 
-<div className="mt-auto">
+        </div>
 
-<button
-onClick={handleLogout}
-className="bg-red-600 w-full py-2 rounded"
->
-Cerrar sesión
-</button>
+        <div className="bg-black rounded-xl p-6 mb-10">
 
-</div>
+          <h2 className="mb-4 font-semibold">
+            Actividad últimos 30 días
+          </h2>
 
-</div>
+          <ResponsiveContainer width="100%" height={300}>
 
-{/* MAIN */}
+            <LineChart data={chart}>
 
-<div className="flex-1 p-8">
+              <XAxis dataKey="date"/>
+              <YAxis/>
+              <Tooltip/>
 
-<h1 className="text-2xl font-bold mb-6">
-Admin Dashboard
-</h1>
+              <Line
+                type="monotone"
+                dataKey="total"
+                stroke="#f97316"
+                strokeWidth={3}
+              />
 
-{/* KPIs */}
+            </LineChart>
 
-<div className="grid grid-cols-2 md:grid-cols-6 gap-6 mb-10">
+          </ResponsiveContainer>
 
-<KPI title="Total" value={stats.total}/>
-<KPI title="Hoy" value={stats.hoy}/>
-<KPI title="Este mes" value={stats.esteMes}/>
-<KPI title="Aprobados" value={stats.aprobados}/>
-<KPI title="Ingresos" value={`$${stats.ingresos}`}/>
-<KPI title="Ticket prom." value={`$${stats.ticketPromedio}`}/>
+        </div>
 
-</div>
+        <div className="grid md:grid-cols-3 gap-8">
 
-{/* CHART */}
+          <Card title="Top Técnicos">
 
-<div className="bg-black rounded-xl p-6 mb-10">
+            {ranking.map((t:any)=>(
+              <div
+                key={t.mail}
+                className="flex justify-between py-2 border-b border-slate-800 text-sm"
+              >
+                <span>{t.mail}</span>
+                <span>{t.total}</span>
+              </div>
+            ))}
 
-<h2 className="mb-4 font-semibold">
-Actividad últimos 30 días
-</h2>
+          </Card>
 
-<ResponsiveContainer width="100%" height={300}>
+          <Card title="Top Clientes">
 
-<LineChart data={chart}>
+            {clientes.map((c:any)=>(
+              <div
+                key={c.cliente}
+                className="flex justify-between py-2 border-b border-slate-800 text-sm"
+              >
+                <span>{c.cliente}</span>
+                <span>${c.total.toLocaleString()}</span>
+              </div>
+            ))}
 
-<XAxis dataKey="date"/>
-<YAxis/>
-<Tooltip/>
+          </Card>
 
-<Line
-type="monotone"
-dataKey="total"
-stroke="#f97316"
-strokeWidth={3}
-/>
+          <Card title="Actividad reciente">
 
-</LineChart>
+            {recent.map((p:any)=>(
+              <div
+                key={p.id}
+                className="flex justify-between py-2 border-b border-slate-800 text-sm"
+              >
+                <span>{p.cliente_nombre}</span>
+                <span>${p.total}</span>
+              </div>
+            ))}
 
-</ResponsiveContainer>
+          </Card>
 
-</div>
+        </div>
 
-<div className="grid md:grid-cols-3 gap-8">
+      </div>
 
-{/* ranking técnicos */}
+    </div>
 
-<Card title="Top Técnicos">
-
-{ranking.map((t)=>(
-<div key={t.mail} className="flex justify-between py-2 border-b border-slate-800 text-sm">
-<span>{t.mail}</span>
-<span>{t.total}</span>
-</div>
-))}
-
-</Card>
-
-{/* clientes */}
-
-<Card title="Top Clientes">
-
-{clientes.map((c)=>(
-<div key={c.cliente} className="flex justify-between py-2 border-b border-slate-800 text-sm">
-<span>{c.cliente}</span>
-<span>${c.total}</span>
-</div>
-))}
-
-</Card>
-
-{/* actividad */}
-
-<Card title="Actividad reciente">
-
-{recent.map((p)=>(
-<div key={p.id} className="flex justify-between py-2 border-b border-slate-800 text-sm">
-
-<span>{p.cliente_nombre}</span>
-<span>${p.total}</span>
-
-</div>
-))}
-
-</Card>
-
-</div>
-
-</div>
-
-</div>
-
-)
+  );
 
 }
 
 function KPI({title,value}:{title:string,value:any}){
 
-return(
+  return(
 
-<div className="bg-black rounded-xl p-5">
+    <div className="bg-black rounded-xl p-5">
 
-<p className="text-sm text-gray-400">
-{title}
-</p>
+      <p className="text-sm text-gray-400">
+        {title}
+      </p>
 
-<p className="text-2xl font-bold">
-{value}
-</p>
+      <p className="text-2xl font-bold">
+        {value}
+      </p>
 
-</div>
+    </div>
 
-)
+  );
 
 }
 
 function Card({title,children}:{title:string,children:any}){
 
-return(
+  return(
 
-<div className="bg-black rounded-xl p-6">
+    <div className="bg-black rounded-xl p-6">
 
-<h2 className="mb-4 font-semibold">
-{title}
-</h2>
+      <h2 className="mb-4 font-semibold">
+        {title}
+      </h2>
 
-{children}
+      {children}
 
-</div>
+    </div>
 
-)
+  );
 
 }
