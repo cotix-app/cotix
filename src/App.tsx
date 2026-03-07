@@ -13,6 +13,7 @@ import Resumen from "./pages/Resumen";
 import Historial from "./pages/Historial";
 import Configuracion from "./pages/Configuracion";
 import Login from "./pages/Login";
+import Signup from "./pages/SignUp";
 
 function App() {
 
@@ -37,10 +38,10 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-
-      <Route element={<ProtectedRoute />}>
-        <Route element={<Layout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route element={<ProtectedRoute />}>
+          <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/cliente" element={<Cliente />} />
           <Route path="/activo" element={<Activo />} />
