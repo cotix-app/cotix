@@ -17,7 +17,6 @@ export default function AdminTable({ columns, data }: Props) {
   const [sortKey,setSortKey] = useState<string>("")
   const [sortDir,setSortDir] = useState<"asc"|"desc">("asc")
 
-  // FILTRO BUSCADOR
   const filtered = data.filter((row)=>{
 
     return Object.values(row)
@@ -27,7 +26,6 @@ export default function AdminTable({ columns, data }: Props) {
 
   })
 
-  // ORDENAMIENTO
   const sorted = [...filtered].sort((a,b)=>{
 
     if(!sortKey) return 0
@@ -66,7 +64,6 @@ export default function AdminTable({ columns, data }: Props) {
 
   }
 
-  // FORMATEO VALORES
   const formatValue = (value:any)=>{
 
     if(value === null || value === undefined) return "-"
@@ -103,7 +100,7 @@ export default function AdminTable({ columns, data }: Props) {
 
   return (
 
-    <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto">
+    <div className="bg-slate-900 border border-slate-800 rounded-xl">
 
       {/* BUSCADOR */}
 
@@ -122,45 +119,21 @@ export default function AdminTable({ columns, data }: Props) {
 
       </div>
 
-      {/* TABLA */}
+      {/* SCROLL CONTAINER */}
 
-      <table className="min-w-[700px] w-full text-sm">
+      <div className="w-full overflow-x-auto">
 
-        <thead className="bg-slate-800 text-gray-300 uppercase text-xs tracking-wider">
+        <table className="min-w-[720px] w-full text-sm">
 
-          <tr>
+          <thead className="bg-slate-800 text-gray-300 uppercase text-xs tracking-wider">
 
-            {columns.map((col)=>(
-              <th
-                key={col.key}
-                onClick={()=>toggleSort(col.key)}
-                className={`px-6 py-4 cursor-pointer select-none ${
-                  col.align === "center"
-                    ? "text-center"
-                    : col.align === "right"
-                    ? "text-right"
-                    : "text-left"
-                }`}
-              >
-
-                {col.label}
-
-              </th>
-            ))}
-
-          </tr>
-
-        </thead>
-
-        <tbody className="divide-y divide-slate-800">
-
-          {sorted.map((row,i)=>(
-            <tr key={i} className="hover:bg-slate-800 transition">
+            <tr>
 
               {columns.map((col)=>(
-                <td
+                <th
                   key={col.key}
-                  className={`px-6 py-4 text-gray-300 ${
+                  onClick={()=>toggleSort(col.key)}
+                  className={`px-6 py-4 cursor-pointer select-none ${
                     col.align === "center"
                       ? "text-center"
                       : col.align === "right"
@@ -169,17 +142,45 @@ export default function AdminTable({ columns, data }: Props) {
                   }`}
                 >
 
-                  {formatValue(row[col.key])}
+                  {col.label}
 
-                </td>
+                </th>
               ))}
 
             </tr>
-          ))}
 
-        </tbody>
+          </thead>
 
-      </table>
+          <tbody className="divide-y divide-slate-800">
+
+            {sorted.map((row,i)=>(
+              <tr key={i} className="hover:bg-slate-800 transition">
+
+                {columns.map((col)=>(
+                  <td
+                    key={col.key}
+                    className={`px-6 py-4 text-gray-300 ${
+                      col.align === "center"
+                        ? "text-center"
+                        : col.align === "right"
+                        ? "text-right"
+                        : "text-left"
+                    }`}
+                  >
+
+                    {formatValue(row[col.key])}
+
+                  </td>
+                ))}
+
+              </tr>
+            ))}
+
+          </tbody>
+
+        </table>
+
+      </div>
 
     </div>
 
