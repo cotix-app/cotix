@@ -13,171 +13,221 @@ type Props = {
 
 export default function AdminTable({ columns, data }: Props) {
 
-  const [search,setSearch] = useState("")
-  const [sortKey,setSortKey] = useState<string>("")
-  const [sortDir,setSortDir] = useState<"asc"|"desc">("asc")
+const [search,setSearch] = useState("")
+const [sortKey,setSortKey] = useState<string>("")
+const [sortDir,setSortDir] = useState<"asc"|"desc">("asc")
+const [page,setPage] = useState(1)
 
-  const filtered = data.filter((row)=>{
+const pageSize = 50
 
-    return Object.values(row)
-      .join(" ")
-      .toLowerCase()
-      .includes(search.toLowerCase())
+/* FILTRO */
 
-  })
+const filtered = data.filter((row)=>
+Object.values(row)
+.join(" ")
+.toLowerCase()
+.includes(search.toLowerCase())
+)
 
-  const sorted = [...filtered].sort((a,b)=>{
+/* ORDENAMIENTO */
 
-    if(!sortKey) return 0
+const sorted = [...filtered].sort((a,b)=>{
 
-    const A = a[sortKey]
-    const B = b[sortKey]
+if(!sortKey) return 0
 
-    if(A === undefined || B === undefined) return 0
+const A = a[sortKey]
+const B = b[sortKey]
 
-    if(typeof A === "number" && typeof B === "number"){
+if(A === undefined || B === undefined) return 0
 
-      return sortDir === "asc"
-        ? A - B
-        : B - A
+if(typeof A === "number" && typeof B === "number"){
 
-    }
+return sortDir === "asc"
+? A - B
+: B - A
 
-    return sortDir === "asc"
-      ? String(A).localeCompare(String(B))
-      : String(B).localeCompare(String(A))
+}
 
-  })
+return sortDir === "asc"
+? String(A).localeCompare(String(B))
+: String(B).localeCompare(String(A))
 
-  const toggleSort = (key:string)=>{
+})
 
-    if(sortKey === key){
-      setSortDir(sortDir === "asc" ? "desc" : "asc")
-    }else{
-      setSortKey(key)
-      setSortDir("asc")
-    }
+/* PAGINACIÓN */
 
-  }
+const totalPages = Math.ceil(sorted.length / pageSize)
 
-  const formatValue = (value:any)=>{
+const paginated = sorted.slice(
+(page-1)*pageSize,
+page*pageSize
+)
 
-    if(value === null || value === undefined) return "-"
+/* SORT */
 
-    if(typeof value === "number"){
-      return value.toLocaleString()
-    }
+const toggleSort = (key:string)=>{
 
-    if(value === "aprobado"){
+if(sortKey === key){
 
-      return (
-        <span className="bg-green-600/20 text-green-400 px-2 py-1 rounded text-xs">
-          aprobado
-        </span>
-      )
+setSortDir(sortDir === "asc" ? "desc" : "asc")
 
-    }
+}else{
 
-    if(value === "rechazado"){
+setSortKey(key)
+setSortDir("asc")
 
-      return (
-        <span className="bg-red-600/20 text-red-400 px-2 py-1 rounded text-xs">
-          rechazado
-        </span>
-      )
+}
 
-    }
+}
 
-    return value
+/* FORMATO */
 
-  }
+const formatValue = (value:any)=>{
 
-  return (
+if(value === null || value === undefined) return "-"
 
-    <div className="bg-slate-900 border border-slate-800 rounded-xl">
+if(typeof value === "number") return value.toLocaleString()
 
-      {/* BUSCADOR */}
+if(value === "aprobado"){
+return(
+<span className="bg-green-600/20 text-green-400 px-2 py-1 rounded text-xs">
+aprobado
+</span>
+)
+}
 
-      <div className="p-4 border-b border-slate-800 flex items-center gap-4 flex-wrap">
+if(value === "rechazado"){
+return(
+<span className="bg-red-600/20 text-red-400 px-2 py-1 rounded text-xs">
+rechazado
+</span>
+)
+}
 
-        <input
-          placeholder="Buscar..."
-          value={search}
-          onChange={(e)=>setSearch(e.target.value)}
-          className="bg-slate-800 px-4 py-2 rounded text-sm w-full md:w-64 text-gray-200"
-        />
+return value
 
-        <span className="text-xs text-gray-400 md:ml-auto">
-          {sorted.length} resultados
-        </span>
+}
 
-      </div>
+return(
 
-      {/* SCROLL HORIZONTAL REAL */}
+<div className="bg-slate-900 border border-slate-800 rounded-xl">
 
-      <div className="w-full overflow-x-auto">
+{/* BUSCADOR */}
 
-        <table className="min-w-[700px] w-full text-sm">
+<div className="p-4 border-b border-slate-800 flex flex-wrap items-center gap-4">
 
-          <thead className="bg-slate-800 text-gray-300 uppercase text-xs tracking-wider">
+<input
+placeholder="Buscar..."
+value={search}
+onChange={(e)=>setSearch(e.target.value)}
+className="bg-slate-800 px-4 py-2 rounded text-sm w-full md:w-64 text-gray-200"
+/>
 
-            <tr>
+<span className="text-xs text-gray-400 md:ml-auto">
+{sorted.length} resultados
+</span>
 
-              {columns.map((col)=>(
-                <th
-                  key={col.key}
-                  onClick={()=>toggleSort(col.key)}
-                  className={`px-6 py-4 cursor-pointer select-none ${
-                    col.align === "center"
-                      ? "text-center"
-                      : col.align === "right"
-                      ? "text-right"
-                      : "text-left"
-                  }`}
-                >
+</div>
 
-                  {col.label}
+{/* TABLA */}
 
-                </th>
-              ))}
+<div className="w-full overflow-x-auto">
 
-            </tr>
+<table className="min-w-[720px] w-full text-sm">
 
-          </thead>
+<thead className="bg-slate-800 text-gray-300 uppercase text-xs sticky top-0">
 
-          <tbody className="divide-y divide-slate-800">
+<tr>
 
-            {sorted.map((row,i)=>(
-              <tr key={i} className="hover:bg-slate-800 transition">
+{columns.map((col)=>(
+<th
+key={col.key}
+onClick={()=>toggleSort(col.key)}
+className={`px-6 py-4 cursor-pointer select-none ${
+col.align === "center"
+? "text-center"
+: col.align === "right"
+? "text-right"
+: "text-left"
+}`}
+>
 
-                {columns.map((col)=>(
-                  <td
-                    key={col.key}
-                    className={`px-6 py-4 text-gray-300 whitespace-nowrap ${
-                      col.align === "center"
-                        ? "text-center"
-                        : col.align === "right"
-                        ? "text-right"
-                        : "text-left"
-                    }`}
-                  >
+{col.label}
 
-                    {formatValue(row[col.key])}
+</th>
+))}
 
-                  </td>
-                ))}
+</tr>
 
-              </tr>
-            ))}
+</thead>
 
-          </tbody>
+<tbody className="divide-y divide-slate-800">
 
-        </table>
+{paginated.map((row,i)=>(
+<tr key={i} className="hover:bg-slate-800/70 transition">
 
-      </div>
+{columns.map((col)=>(
+<td
+key={col.key}
+className={`px-6 py-4 text-gray-300 whitespace-nowrap ${
+col.align === "center"
+? "text-center"
+: col.align === "right"
+? "text-right"
+: "text-left"
+}`}
+>
 
-    </div>
+{formatValue(row[col.key])}
 
-  )
+</td>
+))}
+
+</tr>
+))}
+
+</tbody>
+
+</table>
+
+</div>
+
+{/* PAGINACIÓN */}
+
+{totalPages > 1 && (
+
+<div className="p-4 border-t border-slate-800 flex justify-between items-center text-sm">
+
+<span className="text-gray-400">
+Página {page} de {totalPages}
+</span>
+
+<div className="flex gap-2">
+
+<button
+disabled={page === 1}
+onClick={()=>setPage(page-1)}
+className="px-3 py-1 bg-slate-800 rounded disabled:opacity-40"
+>
+Anterior
+</button>
+
+<button
+disabled={page === totalPages}
+onClick={()=>setPage(page+1)}
+className="px-3 py-1 bg-slate-800 rounded disabled:opacity-40"
+>
+Siguiente
+</button>
+
+</div>
+
+</div>
+
+)}
+
+</div>
+
+)
 
 }
