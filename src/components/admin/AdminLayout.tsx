@@ -21,7 +21,7 @@ setCollapsed(true)
 
 return(
 
-<div className="flex min-h-screen w-full overflow-x-hidden bg-[#0f172a] text-white">
+<div className="flex min-h-screen w-full bg-[#0f172a] text-white">
 
 {mobileOpen && (
 <div
@@ -81,7 +81,9 @@ className="bg-red-600 hover:bg-red-700 w-full py-2 rounded text-sm"
 
 </div>
 
-<div className="flex-1 flex flex-col">
+{/* CONTENIDO */}
+
+<div className="flex-1 flex flex-col min-w-0">
 
 <header className="h-[60px] border-b border-slate-800 flex items-center px-4 md:px-6 bg-[#020617]">
 
@@ -119,7 +121,9 @@ A
 
 </header>
 
-<main className="flex-1 w-full overflow-y-auto p-4 md:p-6">
+{/* CONTENIDO SCROLLABLE */}
+
+<main className="flex-1 min-w-0 overflow-x-auto p-4 md:p-6">
 
 <Outlet/>
 
