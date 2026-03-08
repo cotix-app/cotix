@@ -4,7 +4,6 @@ import { guardarConfig } from "../lib/configSync";
 import { supabase } from "../lib/supabase";
 
 export default function Configuracion() {
-
   const { data, setData } = useCotix();
 
   const [configLocal, setConfigLocal] = useState(data.config);
@@ -13,82 +12,65 @@ export default function Configuracion() {
   const handleChange = (campo: string, valor: any) => {
     setConfigLocal({
       ...configLocal,
-      [campo]: valor
+      [campo]: valor,
     });
   };
 
-  // ---------- SUBIR LOGO ----------
- const subirLogo = async (file: File) => {
+  const subirLogo = async (file: File) => {
+    try {
+      setUploading(true);
 
-  try {
+      if (configLocal.logo_url) {
+        const parts = configLocal.logo_url.split("/logos/");
+        const oldFile = parts[1];
 
-    setUploading(true);
-
-    // BORRAR LOGO ANTERIOR
-    if (configLocal.logo_url) {
-
-      const parts = configLocal.logo_url.split("/logos/");
-      const oldFile = parts[1];
-
-      if (oldFile) {
-        await supabase
-          .storage
-          .from("logos")
-          .remove([oldFile]);
+        if (oldFile) {
+          await supabase.storage.from("logos").remove([oldFile]);
+        }
       }
 
-    }
+      const fileName = `logo_${Date.now()}.png`;
 
-    const fileName = `logo_${Date.now()}.png`;
+      const { error } = await supabase.storage
+        .from("logos")
+        .upload(fileName, file, { upsert: true });
 
-    const { error } = await supabase.storage
-      .from("logos")
-      .upload(fileName, file, { upsert: true });
+      if (error) {
+        alert("Error subiendo logo");
+        setUploading(false);
+        return;
+      }
 
-    if (error) {
+      const { data: urlData } = supabase.storage
+        .from("logos")
+        .getPublicUrl(fileName);
+
+      const url = urlData.publicUrl;
+
+      setConfigLocal({
+        ...configLocal,
+        logo_url: url,
+      });
+    } catch (e) {
+      console.error(e);
       alert("Error subiendo logo");
-      return;
     }
 
-    const { data:urlData } = supabase
-      .storage
-      .from("logos")
-      .getPublicUrl(fileName);
-
-    const url = urlData.publicUrl;
-
-    setConfigLocal({
-      ...configLocal,
-      logo_url: url
-    });
-
-  } catch (e) {
-
-    console.error(e);
-    alert("Error subiendo logo");
-
-  }
-
-  setUploading(false);
-
-};
-
-  const handleLogo = async (e:any) => {
-
-    const file = e.target.files[0];
-
-    if(!file) return;
-
-    await subirLogo(file);
-
+    setUploading(false);
   };
 
-  // ---------- GUARDAR ----------
-  const guardar = async () => {
+  const handleLogo = async (e: any) => {
+    const file = e.target.files[0];
 
+    if (!file) return;
+
+    await subirLogo(file);
+  };
+
+  const guardar = async () => {
     const nuevoData = {
       ...data,
-      config: configLocal
+      config: configLocal,
     };
 
     setData(nuevoData);
@@ -96,41 +78,27 @@ export default function Configuracion() {
     await guardarConfig(configLocal);
 
     alert("Configuración guardada");
-
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
-
       <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-md space-y-4">
+        <h2 className="text-xl font-bold text-center">Configuración</h2>
 
-        <h2 className="text-xl font-bold text-center">
-          Configuración
-        </h2>
-
-        {/* Empresa */}
         <div>
-
-          <label className="block text-sm font-medium">
-            Nombre de empresa
-          </label>
+          <label className="block text-sm font-medium">Nombre de empresa</label>
 
           <input
             type="text"
             value={configLocal.empresa}
-            onChange={(e)=>
-              handleChange("empresa",e.target.value.toUpperCase())
+            onChange={(e) =>
+              handleChange("empresa", e.target.value.toUpperCase())
             }
             className="w-full border p-2 rounded mt-1"
           />
-
         </div>
 
-
-        {/* LOGO */}
-
         <div>
-
           <label className="block text-sm font-medium mb-2">
             Logo de empresa
           </label>
@@ -148,52 +116,31 @@ export default function Configuracion() {
             onChange={handleLogo}
             disabled={uploading}
           />
-
         </div>
 
-
-        {/* Mostrar fecha */}
-
         <div className="flex items-center justify-between">
-
           <span>Mostrar fecha en PDF</span>
 
           <input
             type="checkbox"
             checked={configLocal.mostrarFechaHora}
-            onChange={(e)=>
-              handleChange("mostrarFechaHora",e.target.checked)
-            }
+            onChange={(e) => handleChange("mostrarFechaHora", e.target.checked)}
           />
-
         </div>
 
-
-        {/* Validez */}
-
         <div>
-
-          <label className="block text-sm font-medium">
-            Días de validez
-          </label>
+          <label className="block text-sm font-medium">Días de validez</label>
 
           <input
             type="number"
             min="0"
             value={configLocal.validezDias}
-            onChange={(e)=>
-              handleChange(
-                "validezDias",
-                Number(e.target.value)
-              )
+            onChange={(e) =>
+              handleChange("validezDias", Number(e.target.value))
             }
             className="w-full border p-2 rounded mt-1"
           />
-
         </div>
-
-
-        {/* GUARDAR */}
 
         <button
           onClick={guardar}
@@ -201,9 +148,7 @@ export default function Configuracion() {
         >
           Guardar configuración
         </button>
-
       </div>
-
     </div>
   );
 }

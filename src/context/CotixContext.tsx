@@ -25,6 +25,7 @@ export type Presupuesto = {
   id: string;
   fecha: string;
   estado: string;
+  empresa_id?: string | null;
   data: CotixData;
   synced?: boolean;
 };
@@ -47,6 +48,7 @@ type CotixContextType = {
   activarPro: () => void;
   editingId: string | null;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
+  empresaId: string | null;
 };
 
 const CotixContext = createContext<CotixContextType | undefined>(undefined);
@@ -54,6 +56,10 @@ const CotixContext = createContext<CotixContextType | undefined>(undefined);
 export function CotixProvider({ children }: { children: React.ReactNode }) {
   const [plan, setPlan] = useState<PlanType>(() => {
     return (localStorage.getItem("cotixPlan") as PlanType) || "free";
+  });
+
+  const [empresaId, setEmpresaId] = useState<string | null>(() => {
+    return localStorage.getItem("cotixEmpresaId");
   });
 
   const [data, setData] = useState<CotixData>(() => {
@@ -99,6 +105,11 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
+    const id = localStorage.getItem("cotixEmpresaId");
+    setEmpresaId(id);
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem("cotixData", JSON.stringify(data));
   }, [data]);
 
@@ -124,6 +135,7 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
           id: p.id,
           fecha: p.fecha,
           estado: p.estado || "pendiente",
+          empresa_id: p.empresa_id || null,
           data: {
             cliente: {
               nombre: p.cliente_nombre,
@@ -159,6 +171,13 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
       try {
         const { data: session } = await supabase.auth.getSession();
         const email = session.session?.user?.email;
+
+        const {data: rows} = await supabase
+        .from("presupuestos")
+        .select("*")
+        .eq("tecnico_mail", email)
+        .order("fecha",{ascending:false});
+        if(!rows) return;
 
         if (!email) return;
 
@@ -259,6 +278,7 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
         activarPro,
         editingId,
         setEditingId,
+        empresaId,
       }}
     >
       {children}

@@ -4,87 +4,76 @@ import { useCotix } from "../context/CotixContext";
 import { supabase } from "../lib/supabase";
 
 export default function Historial() {
-  const { presupuestos, setPresupuestos } = useCotix();
+  const { presupuestos, setPresupuestos, setData, setEditingId } = useCotix();
   const navigate = useNavigate();
 
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [busqueda, setBusqueda] = useState<string>("");
 
- const eliminarPresupuesto = async (id: string) => {
+  const eliminarPresupuesto = async (id: string) => {
+    const nuevos = presupuestos.filter((p) => p.id !== id);
+    setPresupuestos(nuevos);
 
-  // eliminar en React
-  const nuevos = presupuestos.filter((p) => p.id !== id);
-  setPresupuestos(nuevos);
-
-  // eliminar en Supabase
-  const { error } = await supabase
-    .from("presupuestos")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    console.error("Error eliminando en Supabase:", error);
-  }
-
-};
-
-  const { setData, setEditingId } = useCotix();
+    await supabase.from("presupuestos").delete().eq("id", id);
+  };
 
   const editarPresupuesto = (presupuesto: any) => {
     setData(presupuesto.data);
     setEditingId(presupuesto.id);
+
     navigate("/cliente");
   };
 
- const cambiarEstado = async (id: string, nuevoEstado: string) => {
+  const cambiarEstado = async (id: string, nuevoEstado: string) => {
+    const actualizados = presupuestos.map((p) =>
+      p.id === id ? { ...p, estado: nuevoEstado } : p,
+    );
 
-  const actualizados = presupuestos.map((p) =>
-    p.id === id ? { ...p, estado: nuevoEstado } : p
-  );
+    setPresupuestos(actualizados);
 
-  setPresupuestos(actualizados);
-
-  await supabase
-    .from("presupuestos")
-    .update({ estado: nuevoEstado })
-    .eq("id", id);
-
-};
+    await supabase
+      .from("presupuestos")
+      .update({ estado: nuevoEstado })
+      .eq("id", id);
+  };
 
   const getEstadoColor = (estado: string) => {
     switch (estado) {
       case "aprobado":
         return "text-green-600";
+
       case "rechazado":
         return "text-red-600";
+
       default:
         return "text-yellow-600";
     }
   };
 
-  // 🔥 Ordenados por fecha (más nuevo primero)
   const ordenados = [...presupuestos].sort(
     (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime(),
   );
 
-  // 🔥 Filtro por estado + búsqueda por cliente
   const filtrados = ordenados.filter((p) => {
     const estado = p.estado || "pendiente";
+
     const coincideEstado = filtroEstado === "todos" || estado === filtroEstado;
 
-    const coincideBusqueda = p.data.cliente.nombre
+    const coincideBusqueda = (p.data?.cliente?.nombre || "")
       .toLowerCase()
       .includes(busqueda.toLowerCase());
 
     return coincideEstado && coincideBusqueda;
   });
 
-  // 🔥 Contadores
   const total = presupuestos.length;
+
   const pendientes = presupuestos.filter(
     (p) => (p.estado || "pendiente") === "pendiente",
   ).length;
+
   const aprobados = presupuestos.filter((p) => p.estado === "aprobado").length;
+
   const rechazados = presupuestos.filter(
     (p) => p.estado === "rechazado",
   ).length;
@@ -99,27 +88,28 @@ export default function Historial() {
         Historial de Presupuestos
       </h2>
 
-      {/* 🔥 DASHBOARD CONTADORES */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white p-4 rounded-xl shadow text-center">
           <p className="text-sm text-gray-500">Total</p>
           <p className="font-bold text-lg">{total}</p>
         </div>
+
         <div className="bg-white p-4 rounded-xl shadow text-center">
           <p className="text-sm text-yellow-600">Pendientes</p>
           <p className="font-bold text-lg">{pendientes}</p>
         </div>
+
         <div className="bg-white p-4 rounded-xl shadow text-center">
           <p className="text-sm text-green-600">Aprobados</p>
           <p className="font-bold text-lg">{aprobados}</p>
         </div>
+
         <div className="bg-white p-4 rounded-xl shadow text-center">
           <p className="text-sm text-red-600">Rechazados</p>
           <p className="font-bold text-lg">{rechazados}</p>
         </div>
       </div>
 
-      {/* 🔥 FILTROS */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <select
           value={filtroEstado}
@@ -156,7 +146,12 @@ export default function Historial() {
             return (
               <div key={p.id} className="bg-white p-4 rounded-xl shadow-md">
                 <p className="font-semibold">
-                  Cliente: {p.data.cliente.nombre}
+                  Cliente: {p.data?.cliente?.nombre}
+                </p>
+
+                <p className="text-sm text-gray-500">
+                  Zona: {p.data?.cliente?.localidad},{" "}
+                  {p.data?.cliente?.provincia}
                 </p>
 
                 <p className="text-sm text-gray-500">

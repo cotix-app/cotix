@@ -141,7 +141,6 @@ export default function Resumen() {
     window.dispatchEvent(new Event("cotix-saved"));
 
     const id = editingId || crypto.randomUUID();
-
     const fecha = new Date().toISOString();
 
     const estadoActual = editingId
@@ -190,9 +189,22 @@ export default function Resumen() {
 
     const user = await getUser();
 
+    let empresa_id = null;
+
+    if (user?.id) {
+      const { data: empresaRel } = await supabase
+        .from("tecnicos_empresa")
+        .select("empresa_id")
+        .eq("user_id", user.id)
+        .single();
+
+      empresa_id = empresaRel?.empresa_id || null;
+    }
+
     await supabase.from("presupuestos").upsert({
       id,
       tecnico_mail: user?.email,
+      empresa_id,
       cliente_nombre: data.cliente.nombre,
       cliente_telefono: data.cliente.telefono,
       cliente_pais: data.cliente.pais,
@@ -224,9 +236,11 @@ export default function Resumen() {
           <p>
             <strong>Cliente:</strong> {data.cliente.nombre}
           </p>
+
           <p>
             <strong>Equipo:</strong> {data.activo.tipo}
           </p>
+
           <p>
             <strong>Zona:</strong> {data.cliente.localidad},{" "}
             {data.cliente.provincia} - {data.cliente.pais}
