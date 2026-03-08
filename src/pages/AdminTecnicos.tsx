@@ -7,10 +7,10 @@ export default function AdminTecnicos(){
 const [tecnicos,setTecnicos] = useState<any[]>([])
 
 const columns = [
-  { key: "mail", label: "Técnico" },
-  { key: "presupuestos", label: "Presupuestos", align: "center" as const },
-  { key: "aprobados", label: "Aprobados", align: "center" as const },
-  { key: "ingresos", label: "Ingresos", align: "right" as const }
+{ key: "mail", label: "Técnico" },
+{ key: "presupuestos", label: "Presupuestos", align: "center" as const },
+{ key: "aprobados", label: "Aprobados", align: "center" as const },
+{ key: "ingresos", label: "Ingresos", align: "right" as const }
 ]
 
 useEffect(()=>{
@@ -61,16 +61,24 @@ setTecnicos(lista)
 
 return(
 
-<div className="p-8">
+<div className="space-y-6">
 
-<h1 className="text-2xl font-bold mb-6">
+<h1 className="text-xl md:text-2xl font-bold">
 Técnicos
 </h1>
+
+<div className="bg-black rounded-xl p-4 md:p-6">
+
+<div className="overflow-x-auto">
 
 <AdminTable
 columns={columns}
 data={tecnicos}
 />
+
+</div>
+
+</div>
 
 </div>
 

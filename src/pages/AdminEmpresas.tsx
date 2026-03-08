@@ -3,10 +3,10 @@ import { supabase } from "../lib/supabase"
 import AdminTable from "../components/admin/AdminTable"
 
 const columns = [
-  { key: "empresa", label: "Empresa" },
-  { key: "tecnicos", label: "Técnicos", align: "center" as const },
-  { key: "presupuestos", label: "Presupuestos", align: "center" as const },
-  { key: "ingresos", label: "Ingresos", align: "right" as const }
+{ key: "empresa", label: "Empresa" },
+{ key: "tecnicos", label: "Técnicos", align: "center" as const },
+{ key: "presupuestos", label: "Presupuestos", align: "center" as const },
+{ key: "ingresos", label: "Ingresos", align: "right" as const }
 ]
 
 export default function AdminEmpresas(){
@@ -68,16 +68,24 @@ setEmpresas(lista)
 
 return(
 
-<div className="p-8">
+<div className="space-y-6">
 
-<h1 className="text-2xl font-bold mb-6">
+<h1 className="text-xl md:text-2xl font-bold">
 Empresas
 </h1>
+
+<div className="bg-black rounded-xl p-4 md:p-6">
+
+<div className="overflow-x-auto">
 
 <AdminTable
 columns={columns}
 data={empresas}
 />
+
+</div>
+
+</div>
 
 </div>
 

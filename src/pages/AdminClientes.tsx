@@ -7,9 +7,9 @@ export default function AdminClientes(){
 const [clientes,setClientes] = useState<any[]>([])
 
 const columns = [
-  { key: "cliente", label: "Cliente" },
-  { key: "operaciones", label: "Operaciones", align: "center" as const },
-  { key: "total", label: "Total generado", align: "right" as const }
+{ key: "cliente", label: "Cliente" },
+{ key: "operaciones", label: "Operaciones", align: "center" as const },
+{ key: "total", label: "Total generado", align: "right" as const }
 ]
 
 useEffect(()=>{
@@ -33,9 +33,9 @@ const cliente = p.cliente_nombre || "sin nombre"
 if(!map[cliente]){
 
 map[cliente] = {
-cliente: cliente,
-total: 0,
-operaciones: 0
+cliente,
+total:0,
+operaciones:0
 }
 
 }
@@ -53,16 +53,24 @@ setClientes(lista)
 
 return(
 
-<div className="p-8">
+<div className="space-y-6">
 
-<h1 className="text-2xl font-bold mb-6">
+<h1 className="text-xl md:text-2xl font-bold">
 Clientes
 </h1>
+
+<div className="bg-black rounded-xl p-4 md:p-6">
+
+<div className="overflow-x-auto">
 
 <AdminTable
 columns={columns}
 data={clientes}
 />
+
+</div>
+
+</div>
 
 </div>
 
