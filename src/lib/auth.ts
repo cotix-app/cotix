@@ -1,48 +1,42 @@
-import { supabase } from "./supabase"
+import { supabase } from "./supabase";
 
 export async function login(email: string, password: string) {
-
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
-    password
-  })
+    password,
+  });
 
-  if (error) throw error
+  if (error) throw error;
 
-  localStorage.setItem("cotixUser", email)
+  localStorage.setItem("cotixUser", email);
 
-  return data
+  return data;
 }
 
 export async function register(email: string, password: string) {
-
   const { data, error } = await supabase.auth.signUp({
     email,
-    password
-  })
+    password,
+  });
 
-  if (error) throw error
+  if (error) throw error;
 
-  return data
+  return data;
 }
 
 export async function logout() {
-  await supabase.auth.signOut()
-  localStorage.removeItem("cotixUser")
+  await supabase.auth.signOut();
+  localStorage.removeItem("cotixUser");
 }
 
 export async function resetPassword(email: string) {
+  const { error } = await supabase.auth.resetPasswordForEmail(email);
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email)
-
-  if (error) throw error
-
+  if (error) throw error;
 }
 
 export async function getUser() {
+  const { data } = await supabase.auth.getUser();
 
-  const { data } = await supabase.auth.getUser()
-
-  return data.user
-
+  return data.user;
 }

@@ -40,14 +40,11 @@ export default function AdminDatos() {
 
     const lista = data.map((p: any) => ({
       ...p,
-
       empresa: p.tecnico_mail?.split("@")[1] || "independiente",
-
       fecha: p.fecha ? new Date(p.fecha).toLocaleString() : "-",
     }));
 
     setData(lista);
-
     calcularStats(lista);
   };
 
@@ -77,17 +74,13 @@ export default function AdminDatos() {
     const texto = Object.values(row).join(" ").toLowerCase();
 
     const coincideBusqueda = texto.includes(busqueda.toLowerCase());
-
     const coincideEstado = estado ? row.estado === estado : true;
-
     const coincideTecnico = tecnico ? row.tecnico_mail === tecnico : true;
-
     const coincideEmpresa = empresa ? row.empresa === empresa : true;
 
     const fecha = new Date(row.fecha);
 
     const coincideDesde = desde ? fecha >= new Date(desde) : true;
-
     const coincideHasta = hasta ? fecha <= new Date(hasta) : true;
 
     return (
@@ -128,8 +121,6 @@ export default function AdminDatos() {
     <div className="space-y-6">
       <h1 className="text-xl md:text-2xl font-bold">Centro de Datos Cotix</h1>
 
-      {/* KPIs */}
-
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <KPI title="Presupuestos" value={stats.total} />
         <KPI title="Ingresos" value={`$${stats.ingresos?.toLocaleString()}`} />
@@ -137,8 +128,6 @@ export default function AdminDatos() {
         <KPI title="Clientes" value={stats.clientes} />
         <KPI title="Técnicos activos" value={stats.tecnicos} />
       </div>
-
-      {/* FILTROS */}
 
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 grid md:grid-cols-6 gap-4">
         <input
@@ -197,8 +186,6 @@ export default function AdminDatos() {
         />
       </div>
 
-      {/* EXPORT */}
-
       <div className="flex justify-between items-center">
         <span className="text-sm text-gray-400">
           {filtrados.length} resultados
@@ -221,7 +208,6 @@ function KPI({ title, value }: { title: string; value: any }) {
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
       <p className="text-xs text-gray-400">{title}</p>
-
       <p className="text-xl font-bold">{value ?? 0}</p>
     </div>
   );
