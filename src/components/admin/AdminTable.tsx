@@ -107,8 +107,9 @@ export default function AdminTable({ columns, data }: Props) {
       {/* TABLA */}
 
       <div className="w-full overflow-x-auto">
+        <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-1 from-slate-900"></div>
         <table className="min-w-[720px] w-full text-sm">
-          <thead className="bg-slate-800 text-gray-300 uppercase text-xs sticky top-0">
+          <thead className="hover:bg-slate-800/600 transition-colors">
             <tr>
               {columns.map((col) => (
                 <th
@@ -134,7 +135,7 @@ export default function AdminTable({ columns, data }: Props) {
                 {columns.map((col) => (
                   <td
                     key={col.key}
-                    className={`px-6 py-4 text-gray-300 whitespace-nowrap ${
+                    className={`px-6 py-3 text-gray-300 whitespace-nowrap ${
                       col.align === "center"
                         ? "text-center"
                         : col.align === "right"
