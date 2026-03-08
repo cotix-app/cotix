@@ -103,7 +103,7 @@ export default function AdminTable({ columns, data }: Props) {
 
   return (
 
-    <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+    <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto">
 
       {/* BUSCADOR */}
 
@@ -124,7 +124,7 @@ export default function AdminTable({ columns, data }: Props) {
 
       {/* TABLA */}
 
-      <table className="w-full text-sm">
+      <table className="min-w-[700px] w-full text-sm">
 
         <thead className="bg-slate-800 text-gray-300 uppercase text-xs tracking-wider">
 
