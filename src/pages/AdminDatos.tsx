@@ -21,6 +21,9 @@ export default function AdminDatos() {
     { key: "cliente_pais", label: "País" },
     { key: "tecnico_mail", label: "Técnico" },
     { key: "empresa", label: "Empresa" },
+    { key: "equipo_tipo", label: "Equipo" },
+    { key: "problemas_txt", label: "Problemas" },
+    { key: "tareas_txt", label: "Tareas" },
     { key: "total", label: "Total", align: "right" as const },
     { key: "estado", label: "Estado", align: "center" as const },
     { key: "fecha", label: "Fecha", align: "center" as const },
@@ -41,6 +44,10 @@ export default function AdminDatos() {
     const lista = data.map((p: any) => ({
       ...p,
       empresa: p.tecnico_mail?.split("@")[1] || "independiente",
+      problemas_txt: (p.problemas || []).join(", "),
+      tareas_txt: (p.tareas || [])
+        .map((t: any) => `${t.descripcion} ($${t.precio})`)
+        .join(" | "),
       fecha: p.fecha ? new Date(p.fecha).toLocaleString() : "-",
     }));
 
@@ -97,7 +104,7 @@ export default function AdminDatos() {
     const headers = Object.keys(filtrados[0] || {});
 
     const rows = filtrados.map((r) =>
-      headers.map((h) => `"${r[h]}"`).join(","),
+      headers.map((h) => `"${r[h]}"`).join(",")
     );
 
     const csv = headers.join(",") + "\n" + rows.join("\n");
