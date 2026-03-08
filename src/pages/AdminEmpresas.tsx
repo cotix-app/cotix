@@ -74,18 +74,12 @@ return(
 Empresas
 </h1>
 
-<div className="bg-black rounded-xl p-4 md:p-6">
-
-<div className="overflow-x-auto">
 
 <AdminTable
 columns={columns}
 data={empresas}
 />
 
-</div>
-
-</div>
 
 </div>
 
