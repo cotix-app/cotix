@@ -114,7 +114,7 @@ Cotix SaaS
 </div>
 
 <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-sm font-bold">
-A
+C
 </div>
 
 </div>
@@ -123,7 +123,7 @@ A
 
 {/* CONTENIDO SCROLLABLE */}
 
-<main className="flex-1 min-w-0 overflow-x-auto p-4 md:p-6">
+<main className="flex-1 min-w-0 p-4 md:p-6">
 
 <Outlet/>
 
