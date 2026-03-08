@@ -79,9 +79,9 @@ data.forEach((p:any)=>{
 
 const key = new Date(p.fecha).toISOString().split("T")[0]
 
-if(!dias[key]) dias[key]=0
+if(!dias[key]) dias[key] = 0
 
-dias[key]++
+dias[key]+= Number(p.total || 0)
 
 })
 
