@@ -19,13 +19,9 @@ export default function AdminTable({ columns, data }: Props) {
 
   const pageSize = 50;
 
-  /* FILTRO */
-
   const filtered = data.filter((row) =>
     Object.values(row).join(" ").toLowerCase().includes(search.toLowerCase()),
   );
-
-  /* ORDENAMIENTO */
 
   const sorted = [...filtered].sort((a, b) => {
     if (!sortKey) return 0;
@@ -44,13 +40,9 @@ export default function AdminTable({ columns, data }: Props) {
       : String(B).localeCompare(String(A));
   });
 
-  /* PAGINACIÓN */
-
   const totalPages = Math.ceil(sorted.length / pageSize);
 
   const paginated = sorted.slice((page - 1) * pageSize, page * pageSize);
-
-  /* SORT */
 
   const toggleSort = (key: string) => {
     if (sortKey === key) {
@@ -61,12 +53,12 @@ export default function AdminTable({ columns, data }: Props) {
     }
   };
 
-  /* FORMATO */
-
   const formatValue = (value: any) => {
     if (value === null || value === undefined) return "-";
 
-    if (typeof value === "number") return value.toLocaleString();
+    if (typeof value === "number") {
+      return value.toLocaleString();
+    }
 
     if (value === "aprobado") {
       return (
@@ -106,10 +98,9 @@ export default function AdminTable({ columns, data }: Props) {
 
       {/* TABLA */}
 
-      <div className="w-full overflow-x-auto">
-        <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-1 from-slate-900"></div>
+      <div className="relative w-full overflow-x-auto max-h-[600px] overflow-y-auto">
         <table className="min-w-[720px] w-full text-sm">
-          <thead className="hover:bg-slate-800/600 transition-colors">
+          <thead className="sticky top-0 z-10 bg-slate-800 text-gray-300 uppercase text-xs">
             <tr>
               {columns.map((col) => (
                 <th
