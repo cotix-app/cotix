@@ -9,6 +9,9 @@ export default function AdminDatos() {
   const [estado, setEstado] = useState("");
   const [tecnico, setTecnico] = useState("");
   const [empresa, setEmpresa] = useState("");
+  const [equipo, setEquipo] = useState("");
+  const [problema, setProblema] = useState("");
+  const [tarea, setTarea] = useState("");
   const [desde, setDesde] = useState("");
   const [hasta, setHasta] = useState("");
 
@@ -84,6 +87,13 @@ export default function AdminDatos() {
     const coincideEstado = estado ? row.estado === estado : true;
     const coincideTecnico = tecnico ? row.tecnico_mail === tecnico : true;
     const coincideEmpresa = empresa ? row.empresa === empresa : true;
+    const coincideEquipo = equipo ? row.equipo_tipo === equipo : true;
+    const coincideProblema = problema
+      ? row.problemas_txt?.toLowerCase().includes(problema.toLowerCase())
+      : true;
+    const coincideTarea = tarea
+      ? row.tareas_txt?.toLowerCase().includes(tarea.toLowerCase())
+      : true;
 
     const fecha = new Date(row.fecha);
 
@@ -95,6 +105,9 @@ export default function AdminDatos() {
       coincideEstado &&
       coincideTecnico &&
       coincideEmpresa &&
+      coincideEquipo &&
+      coincideProblema &&
+      coincideTarea &&
       coincideDesde &&
       coincideHasta
     );
@@ -104,7 +117,7 @@ export default function AdminDatos() {
     const headers = Object.keys(filtrados[0] || {});
 
     const rows = filtrados.map((r) =>
-      headers.map((h) => `"${r[h]}"`).join(",")
+      headers.map((h) => `"${r[h]}"`).join(","),
     );
 
     const csv = headers.join(",") + "\n" + rows.join("\n");
@@ -123,6 +136,7 @@ export default function AdminDatos() {
 
   const tecnicos = [...new Set(data.map((d) => d.tecnico_mail))];
   const empresas = [...new Set(data.map((d) => d.empresa))];
+  const equipos = [...new Set(data.map((d) => d.equipo_tipo))];
 
   return (
     <div className="space-y-6">
@@ -136,7 +150,7 @@ export default function AdminDatos() {
         <KPI title="Técnicos activos" value={stats.tecnicos} />
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 grid md:grid-cols-6 gap-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 grid md:grid-cols-8 gap-4">
         <input
           placeholder="Buscar..."
           value={busqueda}
@@ -160,7 +174,6 @@ export default function AdminDatos() {
           className="bg-slate-800 px-3 py-2 rounded text-sm"
         >
           <option value="">Técnico</option>
-
           {tecnicos.map((t: any) => (
             <option key={t}>{t}</option>
           ))}
@@ -172,11 +185,35 @@ export default function AdminDatos() {
           className="bg-slate-800 px-3 py-2 rounded text-sm"
         >
           <option value="">Empresa</option>
-
           {empresas.map((e: any) => (
             <option key={e}>{e}</option>
           ))}
         </select>
+
+        <select
+          value={equipo}
+          onChange={(e) => setEquipo(e.target.value)}
+          className="bg-slate-800 px-3 py-2 rounded text-sm"
+        >
+          <option value="">Equipo</option>
+          {equipos.map((eq: any) => (
+            <option key={eq}>{eq}</option>
+          ))}
+        </select>
+
+        <input
+          placeholder="Problema"
+          value={problema}
+          onChange={(e) => setProblema(e.target.value)}
+          className="bg-slate-800 px-3 py-2 rounded text-sm"
+        />
+
+        <input
+          placeholder="Tarea"
+          value={tarea}
+          onChange={(e) => setTarea(e.target.value)}
+          className="bg-slate-800 px-3 py-2 rounded text-sm"
+        />
 
         <input
           type="date"
