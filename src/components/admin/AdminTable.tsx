@@ -52,14 +52,10 @@ export default function AdminTable({ columns, data }: Props) {
   const toggleSort = (key:string)=>{
 
     if(sortKey === key){
-
       setSortDir(sortDir === "asc" ? "desc" : "asc")
-
     }else{
-
       setSortKey(key)
       setSortDir("asc")
-
     }
 
   }
@@ -69,9 +65,7 @@ export default function AdminTable({ columns, data }: Props) {
     if(value === null || value === undefined) return "-"
 
     if(typeof value === "number"){
-
       return value.toLocaleString()
-
     }
 
     if(value === "aprobado"){
@@ -104,26 +98,26 @@ export default function AdminTable({ columns, data }: Props) {
 
       {/* BUSCADOR */}
 
-      <div className="p-4 border-b border-slate-800 flex items-center">
+      <div className="p-4 border-b border-slate-800 flex items-center gap-4 flex-wrap">
 
         <input
           placeholder="Buscar..."
           value={search}
           onChange={(e)=>setSearch(e.target.value)}
-          className="bg-slate-800 px-4 py-2 rounded text-sm w-64 text-gray-200"
+          className="bg-slate-800 px-4 py-2 rounded text-sm w-full md:w-64 text-gray-200"
         />
 
-        <span className="ml-auto text-xs text-gray-400">
+        <span className="text-xs text-gray-400 md:ml-auto">
           {sorted.length} resultados
         </span>
 
       </div>
 
-      {/* SCROLL CONTAINER */}
+      {/* SCROLL HORIZONTAL REAL */}
 
       <div className="w-full overflow-x-auto">
 
-        <table className="min-w-[720px] w-full text-sm">
+        <table className="min-w-[700px] w-full text-sm">
 
           <thead className="bg-slate-800 text-gray-300 uppercase text-xs tracking-wider">
 
@@ -159,7 +153,7 @@ export default function AdminTable({ columns, data }: Props) {
                 {columns.map((col)=>(
                   <td
                     key={col.key}
-                    className={`px-6 py-4 text-gray-300 ${
+                    className={`px-6 py-4 text-gray-300 whitespace-nowrap ${
                       col.align === "center"
                         ? "text-center"
                         : col.align === "right"
