@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { logout } from "../lib/auth";
-import { useNavigate } from "react-router-dom";
 
 import {
 LineChart,
@@ -14,7 +12,7 @@ ResponsiveContainer
 
 export default function AdminDashboard() {
 
-const navigate = useNavigate()
+
 
 const [stats,setStats] = useState<any>({})
 const [chart,setChart] = useState<any[]>([])
@@ -26,10 +24,6 @@ useEffect(()=>{
 cargar()
 },[])
 
-const handleLogout = async()=>{
-await logout()
-navigate("/login")
-}
 
 const cargar = async()=>{
 
@@ -167,12 +161,6 @@ return(
 Admin Dashboard
 </h1>
 
-<button
-onClick={handleLogout}
-className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm w-full md:w-auto"
->
-Cerrar sesión
-</button>
 
 </div>
 
