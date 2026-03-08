@@ -22,6 +22,7 @@ import Configuracion from "./pages/Configuracion";
 import Login from "./pages/Login";
 import Signup from "./pages/SignUp";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminDatos from "./pages/AdminDatos";
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -62,6 +63,7 @@ function App() {
           <Route path="/admin/clientes" element={<AdminClientes />} />
           <Route path="/admin/metricas" element={<AdminMetricas />} />
           <Route path="/admin/sistema" element={<AdminSistema />} />
+          <Route path="/admin/datos" element={<AdminDatos />} />
         </Route>
       </Route>
 

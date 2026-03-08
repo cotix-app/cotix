@@ -4,8 +4,8 @@ import { useCotix } from "../context/CotixContext";
 export default function Cliente() {
   const navigate = useNavigate();
   const { data, setData } = useCotix();
-  const nombre = data.cliente.nombre;
-  const telefono = data.cliente.telefono;
+
+  const { nombre, telefono, pais, provincia, localidad } = data.cliente;
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col p-6">
@@ -48,11 +48,59 @@ export default function Cliente() {
             },
           })
         }
+        className="mb-4 p-3 border rounded-lg"
+      />
+
+      <input
+        type="text"
+        placeholder="PAÍS"
+        value={pais || ""}
+        onChange={(e) =>
+          setData({
+            ...data,
+            cliente: {
+              ...data.cliente,
+              pais: e.target.value,
+            },
+          })
+        }
+        className="mb-4 p-3 border rounded-lg"
+      />
+
+      <input
+        type="text"
+        placeholder="PROVINCIA / ESTADO"
+        value={provincia || ""}
+        onChange={(e) =>
+          setData({
+            ...data,
+            cliente: {
+              ...data.cliente,
+              provincia: e.target.value,
+            },
+          })
+        }
+        className="mb-4 p-3 border rounded-lg"
+      />
+
+      <input
+        type="text"
+        placeholder="LOCALIDAD / CIUDAD"
+        value={localidad || ""}
+        onChange={(e) =>
+          setData({
+            ...data,
+            cliente: {
+              ...data.cliente,
+              localidad: e.target.value,
+            },
+          })
+        }
         className="mb-6 p-3 border rounded-lg"
       />
 
       <button
-        disabled={!nombre}
+        disabled={!nombre || !pais || !provincia || !localidad}
         onClick={() => navigate("/activo")}
         className="bg-[#FF7A00] text-white py-3 rounded-xl disabled:opacity-50 hover:bg-blue-800 transition"
       >

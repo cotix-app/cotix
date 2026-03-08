@@ -2,7 +2,13 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
 export type CotixData = {
-  cliente: { nombre: string; telefono: string };
+  cliente: {
+    nombre: string;
+    telefono: string;
+    pais?: string;
+    provincia?: string;
+    localidad?: string;
+  };
   activo: { tipo: string };
   problemas: string[];
   tareas: { descripcion: string; detalle?: string; precio: number }[];
@@ -46,7 +52,6 @@ type CotixContextType = {
 const CotixContext = createContext<CotixContextType | undefined>(undefined);
 
 export function CotixProvider({ children }: { children: React.ReactNode }) {
-
   const [plan, setPlan] = useState<PlanType>(() => {
     return (localStorage.getItem("cotixPlan") as PlanType) || "free";
   });
@@ -57,16 +62,21 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
     return stored
       ? JSON.parse(stored)
       : {
-          cliente: { nombre: "", telefono: "" },
+          cliente: {
+            nombre: "",
+            telefono: "",
+            pais: "",
+            provincia: "",
+            localidad: "",
+          },
           activo: { tipo: "" },
           problemas: [],
           tareas: [],
-
           config: {
             empresa: "SERVICIO TÉCNICO",
             mostrarFechaHora: true,
             validezDias: 15,
-            logo_url: ""
+            logo_url: "",
           },
         };
   });
@@ -88,7 +98,6 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
     return hoy;
   });
 
-  // ---------- Guardar local ----------
   useEffect(() => {
     localStorage.setItem("cotixData", JSON.stringify(data));
   }, [data]);
@@ -101,15 +110,9 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("cotixPlan", plan);
   }, [plan]);
 
-
-
-  // ---------- REFRESH PRESUPUESTOS ----------
   useEffect(() => {
-
     const handler = async () => {
-
       try {
-
         const { data: rows } = await supabase
           .from("presupuestos")
           .select("*")
@@ -125,6 +128,9 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
             cliente: {
               nombre: p.cliente_nombre,
               telefono: p.cliente_telefono,
+              pais: p.cliente_pais,
+              provincia: p.cliente_provincia,
+              localidad: p.cliente_localidad,
             },
             activo: {
               tipo: p.equipo_tipo,
@@ -136,11 +142,9 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
         }));
 
         setPresupuestos(formateados);
-
       } catch (err) {
         console.error("Error refrescando presupuestos", err);
       }
-
     };
 
     window.addEventListener("cotix-refresh", handler);
@@ -148,18 +152,11 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
     return () => {
       window.removeEventListener("cotix-refresh", handler);
     };
-
   }, [data.config]);
 
-
-
-  // ---------- CONFIG SYNC ----------
   useEffect(() => {
-
     const cargarConfig = async () => {
-
       try {
-
         const { data: session } = await supabase.auth.getSession();
         const email = session.session?.user?.email;
 
@@ -175,25 +172,20 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
 
         setData((prev) => ({
           ...prev,
-
           config: {
             empresa: config.empresa,
             mostrarFechaHora: config.mostrar_fecha,
             validezDias: config.validez_dias,
-            logo_url: config.logo_url || ""
+            logo_url: config.logo_url || "",
           },
         }));
-
       } catch (err) {
         console.error("Error cargando config:", err);
       }
-
     };
 
-    // cargar config al iniciar
     cargarConfig();
 
-    // realtime
     const channel = supabase
       .channel("config-sync")
       .on(
@@ -205,19 +197,15 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
         },
         () => {
           cargarConfig();
-        }
+        },
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-
   }, []);
 
-
-
-  // ---------- TRIAL ----------
   const inicio = new Date(trialInicio).getTime();
   const ahora = new Date().getTime();
 
@@ -225,50 +213,33 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
   const diasRestantes = Math.max(15 - diasPasados, 0);
   const trialActivo = plan === "free" && diasRestantes > 0;
 
-
-
-  // ---------- REGISTRO DIARIO ----------
   const hoy = new Date().toISOString().split("T")[0];
 
   const registro = JSON.parse(
-    localStorage.getItem("cotixRegistroDiario") || "{}"
+    localStorage.getItem("cotixRegistroDiario") || "{}",
   );
 
   const presupuestosHoy: number = registro[hoy] || 0;
   const limiteDiario: number = plan === "pro" ? Infinity : 2;
 
   const puedeCrearHoy: boolean =
-    plan === "pro"
-      ? true
-      : trialActivo && presupuestosHoy < limiteDiario;
-
-
+    plan === "pro" ? true : trialActivo && presupuestosHoy < limiteDiario;
 
   const registrarCreacionHoy = () => {
-
     if (plan === "pro") return;
 
     const registroActual = JSON.parse(
-      localStorage.getItem("cotixRegistroDiario") || "{}"
+      localStorage.getItem("cotixRegistroDiario") || "{}",
     );
 
-    registroActual[hoy] =
-      (registroActual[hoy] || 0) + 1;
+    registroActual[hoy] = (registroActual[hoy] || 0) + 1;
 
-    localStorage.setItem(
-      "cotixRegistroDiario",
-      JSON.stringify(registroActual)
-    );
-
+    localStorage.setItem("cotixRegistroDiario", JSON.stringify(registroActual));
   };
-
-
 
   const activarPro = () => {
     setPlan("pro");
   };
-
-
 
   return (
     <CotixContext.Provider
@@ -296,7 +267,6 @@ export function CotixProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useCotix() {
-
   const context = useContext(CotixContext);
 
   if (!context) {
@@ -304,5 +274,4 @@ export function useCotix() {
   }
 
   return context;
-
 }

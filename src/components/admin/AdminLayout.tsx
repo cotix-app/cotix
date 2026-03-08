@@ -64,6 +64,7 @@ onClick={()=>setCollapsed(!collapsed)}
 <MenuItem to="/admin/clientes" label="Clientes" icon="👥" collapsed={collapsed} onClick={closeMenu}/>
 <MenuItem to="/admin/presupuestos" label="Presupuestos" icon="📄" collapsed={collapsed} onClick={closeMenu}/>
 <MenuItem to="/admin/metricas" label="Métricas" icon="📈" collapsed={collapsed} onClick={closeMenu}/>
+<MenuItem to="/admin/datos" label="Datos" icon="🗂️" collapsed={collapsed} onClick={closeMenu}/>
 <MenuItem to="/admin/sistema" label="Sistema" icon="⚙️" collapsed={collapsed} onClick={closeMenu}/>
 
 </nav>

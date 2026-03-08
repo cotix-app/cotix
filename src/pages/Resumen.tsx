@@ -5,7 +5,6 @@ import { supabase } from "../lib/supabase";
 import { getUser } from "../lib/auth";
 
 export default function Resumen() {
-
   const navigate = useNavigate();
 
   const {
@@ -15,16 +14,12 @@ export default function Resumen() {
     setPresupuestos,
     registrarCreacionHoy,
     editingId,
-    setEditingId
+    setEditingId,
   } = useCotix();
 
-  const total = data.tareas.reduce(
-    (sum, t) => sum + Number(t.precio || 0),
-    0
-  );
+  const total = data.tareas.reduce((sum, t) => sum + Number(t.precio || 0), 0);
 
   const generarPDF = async () => {
-
     const doc = new jsPDF();
 
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -32,90 +27,81 @@ export default function Resumen() {
 
     let y = 25;
 
-    // HEADER
-    doc.setFillColor(25,45,85);
-    doc.rect(0,0,pageWidth,40,"F");
+    doc.setFillColor(25, 45, 85);
+    doc.rect(0, 0, pageWidth, 40, "F");
 
-    // ---------- LOGO ----------
-    if(data.config.logo_url){
-
-      try{
-
+    if (data.config.logo_url) {
+      try {
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.src = data.config.logo_url;
 
-        await new Promise((resolve)=>{
+        await new Promise((resolve) => {
           img.onload = resolve;
         });
 
-        doc.addImage(img,"PNG",10,8,25,25);
-
-      }catch(e){
+        doc.addImage(img, "PNG", 10, 8, 25, 25);
+      } catch (e) {
         console.log("logo no cargado");
       }
-
     }
 
-    doc.setTextColor(255,255,255);
-    doc.setFont("helvetica","bold");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
-    doc.text(data.config.empresa || "SERVICIO TÉCNICO",45,25);
+    doc.text(data.config.empresa || "SERVICIO TÉCNICO", 45, 25);
 
     doc.setFontSize(12);
-    doc.text("PRESUPUESTO",pageWidth-20,20,{align:"right"});
+    doc.text("PRESUPUESTO", pageWidth - 20, 20, { align: "right" });
 
     doc.setFontSize(10);
-    doc.text(`Fecha: ${new Date().toLocaleDateString()}`,pageWidth-20,28,{align:"right"});
+    doc.text(`Fecha: ${new Date().toLocaleDateString()}`, pageWidth - 20, 28, {
+      align: "right",
+    });
 
-    doc.setTextColor(0,0,0);
-    doc.setFont("helvetica","normal");
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "normal");
 
     y = 55;
 
-    // CLIENTE
     doc.setFontSize(12);
 
-    doc.text("Cliente:",20,y);
-    doc.setFont("helvetica","bold");
-    doc.text(data.cliente.nombre,45,y);
-    doc.setFont("helvetica","normal");
+    doc.text("Cliente:", 20, y);
+    doc.setFont("helvetica", "bold");
+    doc.text(data.cliente.nombre, 45, y);
+    doc.setFont("helvetica", "normal");
 
     y += 10;
 
-    doc.text("Equipo:",20,y);
-    doc.setFont("helvetica","bold");
-    doc.text(data.activo.tipo || "-",45,y);
-    doc.setFont("helvetica","normal");
+    doc.text("Equipo:", 20, y);
+    doc.setFont("helvetica", "bold");
+    doc.text(data.activo.tipo || "-", 45, y);
+    doc.setFont("helvetica", "normal");
 
     y += 15;
 
-    // HEADER TABLA
-    doc.setFillColor(240,240,240);
-    doc.rect(20,y-7,pageWidth-40,10,"F");
+    doc.setFillColor(240, 240, 240);
+    doc.rect(20, y - 7, pageWidth - 40, 10, "F");
 
-    doc.text("Detalle",25,y);
-    doc.text("Precio",pageWidth-25,y,{align:"right"});
+    doc.text("Detalle", 25, y);
+    doc.text("Precio", pageWidth - 25, y, { align: "right" });
 
     y += 12;
 
-    // TAREAS
-    data.tareas.forEach((t,index)=>{
+    data.tareas.forEach((t, index) => {
+      doc.setFont("helvetica", "bold");
+      doc.text(`${index + 1}. ${t.descripcion}`, 25, y);
 
-      doc.setFont("helvetica","bold");
-      doc.text(`${index+1}. ${t.descripcion}`,25,y);
-
-      doc.setFont("helvetica","normal");
-      doc.text(`$${t.precio}`,pageWidth-25,y,{align:"right"});
+      doc.setFont("helvetica", "normal");
+      doc.text(`$${t.precio}`, pageWidth - 25, y, { align: "right" });
 
       y += 8;
 
-      if(t.detalle && t.detalle.trim() !== ""){
-
+      if (t.detalle && t.detalle.trim() !== "") {
         doc.setFontSize(10);
         doc.setTextColor(80);
 
-        doc.text(t.detalle,30,y,{maxWidth:pageWidth-60});
+        doc.text(t.detalle, 30, y, { maxWidth: pageWidth - 60 });
 
         doc.setTextColor(0);
         doc.setFontSize(12);
@@ -124,29 +110,31 @@ export default function Resumen() {
       }
 
       y += 5;
-
     });
 
-    // BLOQUE TOTAL
     const bloqueFinalY = pageHeight - 40;
 
     doc.setDrawColor(200);
-    doc.line(20,bloqueFinalY-15,pageWidth-20,bloqueFinalY-15);
+    doc.line(20, bloqueFinalY - 15, pageWidth - 20, bloqueFinalY - 15);
 
-    doc.setFillColor(25,45,85);
-    doc.rect(pageWidth-90,bloqueFinalY-10,70,20,"F");
+    doc.setFillColor(25, 45, 85);
+    doc.rect(pageWidth - 90, bloqueFinalY - 10, 70, 20, "F");
 
-    doc.setTextColor(255,255,255);
-    doc.setFont("helvetica","bold");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
-    doc.text(`TOTAL: $${total}`,pageWidth-55,bloqueFinalY+2,{align:"center"});
+    doc.text(`TOTAL: $${total}`, pageWidth - 55, bloqueFinalY + 2, {
+      align: "center",
+    });
 
     doc.setTextColor(0);
-    doc.setFont("helvetica","normal");
+    doc.setFont("helvetica", "normal");
 
     doc.setFontSize(8);
     doc.setTextColor(150);
-    doc.text("Generado con Cotix-App",pageWidth/2,pageHeight-5,{align:"center"});
+    doc.text("Generado con Cotix-App", pageWidth / 2, pageHeight - 5, {
+      align: "center",
+    });
 
     doc.save(`${data.cliente.nombre}_Presupuesto.pdf`);
 
@@ -157,7 +145,7 @@ export default function Resumen() {
     const fecha = new Date().toISOString();
 
     const estadoActual = editingId
-      ? presupuestos.find(p => p.id === editingId)?.estado || "pendiente"
+      ? presupuestos.find((p) => p.id === editingId)?.estado || "pendiente"
       : "pendiente";
 
     const nuevoPresupuesto = {
@@ -165,24 +153,17 @@ export default function Resumen() {
       fecha,
       estado: estadoActual,
       data,
-      synced:false
+      synced: false,
     };
 
-    // EDITAR O CREAR LOCAL
-    if(editingId){
-
-      const actualizados = presupuestos.map(p =>
-        p.id === editingId
-          ? { ...p, data }
-          : p
+    if (editingId) {
+      const actualizados = presupuestos.map((p) =>
+        p.id === editingId ? { ...p, data } : p,
       );
 
       setPresupuestos(actualizados);
-
     } else {
-
-      setPresupuestos([...presupuestos,nuevoPresupuesto]);
-
+      setPresupuestos([...presupuestos, nuevoPresupuesto]);
     }
 
     setEditingId(null);
@@ -190,88 +171,90 @@ export default function Resumen() {
     registrarCreacionHoy();
 
     const nuevoData = {
-      cliente:{nombre:"",telefono:""},
-      activo:{tipo:""},
-      problemas:[],
-      tareas:[],
-      config:data.config
+      cliente: {
+        nombre: "",
+        telefono: "",
+        pais: "",
+        provincia: "",
+        localidad: "",
+      },
+      activo: { tipo: "" },
+      problemas: [],
+      tareas: [],
+      config: data.config,
     };
 
     setData(nuevoData);
 
-    localStorage.setItem("cotixData",JSON.stringify(nuevoData));
+    localStorage.setItem("cotixData", JSON.stringify(nuevoData));
 
-    // GUARDAR EN SUPABASE
     const user = await getUser();
 
-    await supabase
-      .from("presupuestos")
-      .upsert({
-        id,
-        tecnico_mail:user?.email,
-        cliente_nombre:data.cliente.nombre,
-        cliente_telefono:data.cliente.telefono,
-        equipo_tipo:data.activo.tipo,
-        problemas:data.problemas,
-        tareas:data.tareas,
-        total,
-        estado:estadoActual,
-        fecha
-      });
+    await supabase.from("presupuestos").upsert({
+      id,
+      tecnico_mail: user?.email,
+      cliente_nombre: data.cliente.nombre,
+      cliente_telefono: data.cliente.telefono,
+      cliente_pais: data.cliente.pais,
+      cliente_provincia: data.cliente.provincia,
+      cliente_localidad: data.cliente.localidad,
+      equipo_tipo: data.activo.tipo,
+      problemas: data.problemas,
+      tareas: data.tareas,
+      total,
+      estado: estadoActual,
+      fecha,
+    });
 
     navigate("/");
-
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-
-      <button
-        onClick={()=>navigate(-1)}
-        className="mb-4 text-blue-600"
-      >
+      <button onClick={() => navigate(-1)} className="mb-4 text-blue-600">
         ← Volver
       </button>
 
       <div className="bg-white p-10 rounded-xl shadow-xl max-w-2xl mx-auto">
-
         <h2 className="text-3xl font-bold text-blue-900 text-center mb-10">
           Resumen del Presupuesto
         </h2>
 
         <div className="mb-6 text-lg space-y-1">
-          <p><strong>Cliente:</strong> {data.cliente.nombre}</p>
-          <p><strong>Equipo:</strong> {data.activo.tipo}</p>
+          <p>
+            <strong>Cliente:</strong> {data.cliente.nombre}
+          </p>
+          <p>
+            <strong>Equipo:</strong> {data.activo.tipo}
+          </p>
+          <p>
+            <strong>Zona:</strong> {data.cliente.localidad},{" "}
+            {data.cliente.provincia} - {data.cliente.pais}
+          </p>
         </div>
 
         <div className="mb-10">
-
           <div className="flex justify-between font-semibold border-b pb-2">
             <span>Detalle</span>
             <span>Precio</span>
           </div>
 
           <div className="mt-4 space-y-5">
-
-            {data.tareas.map((t,index)=>(
+            {data.tareas.map((t, index) => (
               <div key={index}>
-
                 <div className="flex justify-between font-semibold">
-                  <span>{index+1}. {t.descripcion}</span>
+                  <span>
+                    {index + 1}. {t.descripcion}
+                  </span>
                   <span>${t.precio}</span>
                 </div>
 
                 {t.detalle && t.detalle.trim() !== "" && (
-                  <p className="text-sm text-gray-500 mt-1 ml-4">
-                    {t.detalle}
-                  </p>
+                  <p className="text-sm text-gray-500 mt-1 ml-4">{t.detalle}</p>
                 )}
-
               </div>
             ))}
-
           </div>
-
         </div>
 
         <div className="text-right text-3xl font-bold text-blue-900 mb-10">
@@ -284,11 +267,7 @@ export default function Resumen() {
         >
           Generar PDF
         </button>
-
       </div>
-
     </div>
   );
-  
-
 }
