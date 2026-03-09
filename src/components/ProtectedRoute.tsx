@@ -1,41 +1,47 @@
-import { Navigate, Outlet } from "react-router-dom"
-import { useEffect, useState } from "react"
-import { supabase } from "../lib/supabase"
+import { Navigate, Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
 
 export default function ProtectedRoute() {
 
-  const [loading, setLoading] = useState(true)
-  const [session, setSession] = useState<any>(null)
+const [loading,setLoading] = useState(true)
+const [session,setSession] = useState<any>(null)
 
-  useEffect(() => {
+useEffect(()=>{
 
-    // obtener sesión actual
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session)
-      setLoading(false)
-    })
+const loadSession = async()=>{
 
-    // escuchar cambios de auth
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session)
-        setLoading(false)
-      }
-    )
+const { data } = await supabase.auth.getSession()
 
-    return () => {
-      listener.subscription.unsubscribe()
-    }
+setSession(data.session)
 
-  }, [])
+setLoading(false)
 
-  if (loading) {
-    return null
-  }
+}
 
-  if (!session) {
-    return <Navigate to="/login" replace />
-  }
+loadSession()
 
-  return <Outlet />
+const { data:listener } = supabase.auth.onAuthStateChange(
+(_event,session)=>{
+setSession(session)
+setLoading(false)
+}
+)
+
+return ()=>{
+listener.subscription.unsubscribe()
+}
+
+},[])
+
+if(loading){
+return null
+}
+
+if(!session){
+return <Navigate to="/login" replace/>
+}
+
+return <Outlet/>
+
 }

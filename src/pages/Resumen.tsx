@@ -196,7 +196,7 @@ export default function Resumen() {
         .from("tecnicos_empresa")
         .select("empresa_id")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       empresa_id = empresaRel?.empresa_id || null;
     }

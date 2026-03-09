@@ -4,41 +4,44 @@ import { supabase } from "../lib/supabase"
 
 export default function AdminRoute(){
 
-  const [loading,setLoading] = useState(true)
-  const [isAdmin,setIsAdmin] = useState(false)
+const [loading,setLoading] = useState(true)
+const [isAdmin,setIsAdmin] = useState(false)
 
-  useEffect(()=>{
-    checkAdmin()
-  },[])
+useEffect(()=>{
+checkAdmin()
+},[])
 
-  const checkAdmin = async()=>{
+const checkAdmin = async()=>{
 
-    const { data:userData } = await supabase.auth.getUser()
+const { data:sessionData } = await supabase.auth.getSession()
 
-    if(!userData.user){
-      setLoading(false)
-      return
-    }
+const user = sessionData.session?.user
 
-    const { data } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", userData.user.id)
-      .single()
-      console.log("PROFILE:", data)
+if(!user){
+setLoading(false)
+return
+}
 
-    if(data?.role === "admin"){
-      setIsAdmin(true)
-    }
+const { data } = await supabase
+.from("profiles")
+.select("role")
+.eq("id", user.id)
+.maybeSingle()
 
-    setLoading(false)
+console.log("PROFILE:", data)
 
-  }
+if(data?.role === "admin"){
+setIsAdmin(true)
+}
 
-  if(loading) return null
+setLoading(false)
 
-  if(!isAdmin) return <Navigate to="/"/>
+}
 
-  return <Outlet/>
+if(loading) return null
+
+if(!isAdmin) return <Navigate to="/" replace/>
+
+return <Outlet/>
 
 }

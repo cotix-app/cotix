@@ -3,175 +3,208 @@ import { supabase } from "../lib/supabase";
 import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
-  const navigate = useNavigate();
 
-  const [email,setEmail] = useState("");
-  const [password,setPassword] = useState("");
+const navigate = useNavigate();
 
-  const [pais,setPais] = useState("");
-  const [provincia,setProvincia] = useState("");
-  const [localidad,setLocalidad] = useState("");
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
 
-  const [empresa,setEmpresa] = useState("");
-  const [crearEmpresa,setCrearEmpresa] = useState(false);
+const [pais, setPais] = useState("");
+const [provincia, setProvincia] = useState("");
+const [localidad, setLocalidad] = useState("");
 
-  const [loading,setLoading] = useState(false);
+const [empresa, setEmpresa] = useState("");
+const [crearEmpresa, setCrearEmpresa] = useState(false);
 
-  const handleSignup = async (e:any) => {
+const [loading, setLoading] = useState(false);
 
-    e.preventDefault();
+const handleSignup = async (e: any) => {
 
-    setLoading(true);
+e.preventDefault();
 
-    const { data,error } = await supabase.auth.signUp({
-      email,
-      password
-    });
+setLoading(true);
 
-    if(error){
-      setLoading(false);
-      alert(error.message);
-      return;
-    }
+try {
 
-    if(data.user){
+const { data, error } = await supabase.auth.signUp({
+email,
+password
+});
 
-      await supabase.from("profiles").insert({
-        id:data.user.id,
-        email:data.user.email,
-        pais,
-        provincia,
-        localidad,
-        role:"user"
-      });
+if (error) throw error;
 
-      if(crearEmpresa && empresa){
+const user = data.user;
 
-        const { data:empresaData } = await supabase
-        .from("empresas")
-        .insert({
-          nombre:empresa,
-          pais,
-          provincia,
-          localidad
-        })
-        .select()
-        .single();
+if (!user) {
+setLoading(false);
+return;
+}
 
-        if(empresaData){
+const role = crearEmpresa ? "empresa" : "tech";
 
-          await supabase
-          .from("tecnicos_empresa")
-          .insert({
-            empresa_id:empresaData.id,
-            user_id:data.user.id,
-            rol:"admin"
-          });
+const { error: profileError } = await supabase
+.from("profiles")
+.upsert({
+id: user.id,
+email: user.email,
+pais,
+provincia,
+localidad,
+role
+});
 
-        }
+if (profileError) {
+console.log("profile error", profileError);
+}
 
-      }
+if (crearEmpresa && empresa.trim() !== "") {
 
-    }
+const { data: empresaData, error: empresaError } = await supabase
+.from("empresas")
+.insert({
+nombre: empresa,
+pais,
+provincia,
+localidad
+})
+.select()
+.single();
 
-    setLoading(false);
+if (empresaError) {
+console.log("empresa error", empresaError);
+}
 
-    alert("Cuenta creada. Revisá tu email para confirmar.");
+if (empresaData) {
 
-    navigate("/login");
+const { error: linkError } = await supabase
+.from("tecnicos_empresa")
+.insert({
+empresa_id: empresaData.id,
+user_id: user.id,
+rol: "admin"
+});
 
-  };
+if (linkError) {
+console.log("link error", linkError);
+}
 
-  return (
+}
 
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+}
 
-      <form
-      onSubmit={handleSignup}
-      className="bg-white p-6 rounded-xl shadow-md w-full max-w-md space-y-4"
-      >
+alert("Cuenta creada. Revisá tu email.");
 
-        <h2 className="text-xl font-bold text-center">
-          Crear cuenta
-        </h2>
+navigate("/login");
 
-        <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e)=>setEmail(e.target.value)}
-        required
-        className="w-full border p-2 rounded"
-        />
+} catch (err: any) {
 
-        <input
-        type="password"
-        placeholder="Contraseña"
-        value={password}
-        onChange={(e)=>setPassword(e.target.value)}
-        required
-        className="w-full border p-2 rounded"
-        />
+console.log(err);
+alert(err.message);
 
-        <input
-        type="text"
-        placeholder="País"
-        value={pais}
-        onChange={(e)=>setPais(e.target.value)}
-        required
-        className="w-full border p-2 rounded"
-        />
+}
 
-        <input
-        type="text"
-        placeholder="Provincia / Estado"
-        value={provincia}
-        onChange={(e)=>setProvincia(e.target.value)}
-        required
-        className="w-full border p-2 rounded"
-        />
+setLoading(false);
 
-        <input
-        type="text"
-        placeholder="Localidad / Ciudad"
-        value={localidad}
-        onChange={(e)=>setLocalidad(e.target.value)}
-        required
-        className="w-full border p-2 rounded"
-        />
+};
 
-        <div className="flex items-center gap-2 text-sm">
-          <input
-          type="checkbox"
-          checked={crearEmpresa}
-          onChange={(e)=>setCrearEmpresa(e.target.checked)}
-          />
-          <span>Crear empresa</span>
-        </div>
+return (
 
-        {crearEmpresa && (
+<div className="min-h-screen flex items-center justify-center bg-gray-100">
 
-          <input
-          type="text"
-          placeholder="Nombre de la empresa"
-          value={empresa}
-          onChange={(e)=>setEmpresa(e.target.value)}
-          className="w-full border p-2 rounded"
-          />
+<form
+onSubmit={handleSignup}
+className="bg-white p-6 rounded-xl shadow-md w-full max-w-md space-y-4"
+>
 
-        )}
+<h2 className="text-xl font-bold text-center">
+Crear cuenta
+</h2>
 
-        <button
-        type="submit"
-        disabled={loading}
-        className="w-full bg-blue-900 text-white py-2 rounded"
-        >
-          {loading ? "Creando..." : "Crear cuenta"}
-        </button>
+<input
+type="email"
+placeholder="Email"
+value={email}
+onChange={(e) => setEmail(e.target.value)}
+required
+className="w-full border p-2 rounded"
+/>
 
-      </form>
+<input
+type="password"
+placeholder="Contraseña"
+value={password}
+onChange={(e) => setPassword(e.target.value)}
+required
+className="w-full border p-2 rounded"
+/>
 
-    </div>
+<input
+type="text"
+placeholder="País"
+value={pais}
+onChange={(e) => setPais(e.target.value)}
+required
+className="w-full border p-2 rounded"
+/>
 
-  );
+<input
+type="text"
+placeholder="Provincia"
+value={provincia}
+onChange={(e) => setProvincia(e.target.value)}
+required
+className="w-full border p-2 rounded"
+/>
+
+<input
+type="text"
+placeholder="Localidad"
+value={localidad}
+onChange={(e) => setLocalidad(e.target.value)}
+required
+className="w-full border p-2 rounded"
+/>
+
+<div className="flex items-center gap-2 text-sm">
+
+<input
+type="checkbox"
+checked={crearEmpresa}
+onChange={(e) => setCrearEmpresa(e.target.checked)}
+/>
+
+<span>
+Crear empresa
+</span>
+
+</div>
+
+{crearEmpresa && (
+
+<input
+type="text"
+placeholder="Nombre de la empresa"
+value={empresa}
+onChange={(e) => setEmpresa(e.target.value)}
+className="w-full border p-2 rounded"
+/>
+
+)}
+
+<button
+type="submit"
+disabled={loading}
+className="w-full bg-blue-900 text-white py-2 rounded"
+>
+
+{loading ? "Creando..." : "Crear cuenta"}
+
+</button>
+
+</form>
+
+</div>
+
+);
+
 }
