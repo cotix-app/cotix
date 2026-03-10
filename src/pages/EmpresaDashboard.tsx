@@ -3,24 +3,9 @@ import { supabase } from "../lib/supabase";
 import { getUser, getEmpresa } from "../lib/auth";
 import { useNavigate } from "react-router-dom";
 
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-
 export default function EmpresaDashboard() {
 
   const navigate = useNavigate();
-
-  const [stats,setStats] = useState<any>({});
-  const [chart,setChart] = useState<any[]>([]);
-  const [ranking,setRanking] = useState<any[]>([]);
-  const [clientes,setClientes] = useState<any[]>([]);
-  const [recent,setRecent] = useState<any[]>([]);
 
   const [tecnicos,setTecnicos] = useState<any[]>([]);
   const [tecnicoAsignado,setTecnicoAsignado] = useState("");
@@ -34,28 +19,24 @@ export default function EmpresaDashboard() {
     const user = await getUser();
     if(!user) return;
 
-    /* empresa */
-
     const empresaLocal = await getEmpresa();
     let empresaId = empresaLocal?.empresa_id;
 
     if(!empresaId){
 
-      const { data } = await supabase
+      const { data:empresaLink } = await supabase
         .from("tecnicos_empresa")
         .select("empresa_id")
         .limit(1);
 
-      if(!data || data.length === 0){
+      if(!empresaLink || empresaLink.length === 0){
         console.log("empresa no encontrada");
         return;
       }
 
-      empresaId = data[0].empresa_id;
+      empresaId = empresaLink[0].empresa_id;
 
     }
-
-    /* tecnicos */
 
     const { data:relaciones } = await supabase
       .from("tecnicos_empresa")
@@ -74,129 +55,6 @@ export default function EmpresaDashboard() {
     if(profiles){
       setTecnicos(profiles);
     }
-
-    /* presupuestos */
-
-    const { data } = await supabase
-      .from("presupuestos")
-      .select("*")
-      .eq("empresa_id",empresaId)
-      .order("fecha",{ascending:false});
-
-    if(!data){
-      setStats({});
-      setChart([]);
-      setRanking([]);
-      setClientes([]);
-      setRecent([]);
-      return;
-    }
-
-    const hoy = new Date();
-    const hoyStr = hoy.toISOString().split("T")[0];
-
-    const total = data.length;
-
-    const hoyCount = data.filter((p:any)=>
-      p.fecha && p.fecha.startsWith(hoyStr)
-    ).length;
-
-    const aprobados = data.filter((p:any)=>p.estado==="aprobado");
-    const rechazados = data.filter((p:any)=>p.estado==="rechazado");
-
-    const ingresos = aprobados.reduce(
-      (sum:number,p:any)=>sum + Number(p.total || 0),
-      0
-    );
-
-    const ticketPromedio = aprobados.length
-      ? Math.round(ingresos / aprobados.length)
-      : 0;
-
-    setStats({
-      total,
-      hoy:hoyCount,
-      aprobados:aprobados.length,
-      rechazados:rechazados.length,
-      ingresos,
-      ticketPromedio
-    });
-
-    /* chart */
-
-    const dias:any = {};
-
-    data.forEach((p:any)=>{
-
-      if(!p.fecha) return;
-
-      const key = new Date(p.fecha).toISOString().split("T")[0];
-
-      if(!dias[key]) dias[key]=0;
-
-      dias[key]++;
-
-    });
-
-    const chartData = Object.entries(dias)
-      .map(([date,total])=>({date,total}))
-      .slice(-30);
-
-    setChart(chartData);
-
-    /* ranking */
-
-    const tech:any = {};
-
-    data.forEach((p:any)=>{
-
-      const mail = p.tecnico_mail || "desconocido";
-
-      if(!tech[mail]){
-        tech[mail]={total:0,ingresos:0};
-      }
-
-      tech[mail].total++;
-
-      if(p.estado==="aprobado"){
-        tech[mail].ingresos += Number(p.total || 0);
-      }
-
-    });
-
-    const rankingTech = Object.entries(tech)
-      .map(([mail,val]:any)=>({
-        mail,
-        total:val.total,
-        ingresos:val.ingresos
-      }))
-      .sort((a:any,b:any)=>b.total-a.total);
-
-    setRanking(rankingTech.slice(0,5));
-
-    /* clientes */
-
-    const clientesMap:any = {};
-
-    data.forEach((p:any)=>{
-
-      const cliente = p.cliente_nombre || "desconocido";
-
-      if(!clientesMap[cliente]){
-        clientesMap[cliente]=0;
-      }
-
-      clientesMap[cliente]+=Number(p.total || 0);
-
-    });
-
-    const topClientes = Object.entries(clientesMap)
-      .map(([cliente,total])=>({cliente,total}))
-      .sort((a:any,b:any)=>b.total-a.total);
-
-    setClientes(topClientes.slice(0,5));
-
-    setRecent(data.slice(0,8));
 
   };
 
