@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { getUser } from "../lib/auth";
+import { getUser, getEmpresa } from "../lib/auth";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -32,34 +32,50 @@ export default function EmpresaDashboard() {
   const cargar = async()=>{
 
     const user = await getUser();
-
     if(!user) return;
 
-    const { data:link } = await supabase
-      .from("tecnicos_empresa")
-      .select("empresa_id")
-      .eq("user_id",user.id)
-      .maybeSingle();
+    /* empresa */
 
-    if(!link?.empresa_id) return;
+    const empresaLocal = await getEmpresa();
+    let empresaId = empresaLocal?.empresa_id;
 
-    const empresaId = link.empresa_id;
+    if(!empresaId){
 
-    const { data:techs } = await supabase
-      .from("tecnicos_empresa")
-      .select("user_id, profiles(email)")
-      .eq("empresa_id",empresaId);
+      const { data } = await supabase
+        .from("tecnicos_empresa")
+        .select("empresa_id")
+        .limit(1);
 
-    if(techs){
+      if(!data || data.length === 0){
+        console.log("empresa no encontrada");
+        return;
+      }
 
-      const lista = techs.map((t:any)=>({
-        id:t.user_id,
-        email:t.profiles?.email || "sin email"
-      }));
-
-      setTecnicos(lista);
+      empresaId = data[0].empresa_id;
 
     }
+
+    /* tecnicos */
+
+    const { data:relaciones } = await supabase
+      .from("tecnicos_empresa")
+      .select("user_id")
+      .eq("empresa_id",empresaId);
+
+    if(!relaciones) return;
+
+    const ids = relaciones.map((r:any)=>r.user_id);
+
+    const { data:profiles } = await supabase
+      .from("profiles")
+      .select("id,email")
+      .in("id",ids);
+
+    if(profiles){
+      setTecnicos(profiles);
+    }
+
+    /* presupuestos */
 
     const { data } = await supabase
       .from("presupuestos")
@@ -106,6 +122,8 @@ export default function EmpresaDashboard() {
       ticketPromedio
     });
 
+    /* chart */
+
     const dias:any = {};
 
     data.forEach((p:any)=>{
@@ -125,6 +143,8 @@ export default function EmpresaDashboard() {
       .slice(-30);
 
     setChart(chartData);
+
+    /* ranking */
 
     const tech:any = {};
 
@@ -153,6 +173,8 @@ export default function EmpresaDashboard() {
       .sort((a:any,b:any)=>b.total-a.total);
 
     setRanking(rankingTech.slice(0,5));
+
+    /* clientes */
 
     const clientesMap:any = {};
 
@@ -212,11 +234,9 @@ export default function EmpresaDashboard() {
         </option>
 
         {tecnicos.map((t:any)=>(
-
           <option key={t.id} value={t.email}>
             {t.email}
           </option>
-
         ))}
 
       </select>
@@ -231,158 +251,6 @@ export default function EmpresaDashboard() {
       </button>
 
     </div>
-
-    <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-
-      <KPI title="Total" value={stats.total} />
-      <KPI title="Hoy" value={stats.hoy} />
-      <KPI title="Aprobados" value={stats.aprobados} />
-      <KPI title="Rechazados" value={stats.rechazados} />
-      <KPI title="Ingresos" value={`$${stats.ingresos?.toLocaleString()}`} />
-      <KPI title="Ticket" value={`$${stats.ticketPromedio?.toLocaleString()}`} />
-
-    </div>
-
-    <div className="bg-black rounded-xl p-4 md:p-6">
-
-      <h2 className="mb-4 font-semibold">
-        Actividad últimos 30 días
-      </h2>
-
-      <div className="w-full h-[220px] md:h-[300px]">
-
-        <ResponsiveContainer width="100%" height="100%">
-
-          <LineChart data={chart}>
-
-            <XAxis dataKey="date" hide />
-            <YAxis hide />
-            <Tooltip />
-
-            <Line
-              type="monotone"
-              dataKey="total"
-              stroke="#f97316"
-              strokeWidth={3}
-            />
-
-          </LineChart>
-
-        </ResponsiveContainer>
-
-      </div>
-
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-      <Card title="Top Técnicos">
-
-        {ranking.map((t:any)=>(
-
-          <div
-            key={t.mail}
-            className="flex justify-between py-2 border-b border-slate-800 text-sm"
-          >
-            <span className="truncate">
-              {t.mail}
-            </span>
-
-            <span>
-              {t.total}
-            </span>
-
-          </div>
-
-        ))}
-
-      </Card>
-
-      <Card title="Top Clientes">
-
-        {clientes.map((c:any)=>(
-
-          <div
-            key={c.cliente}
-            className="flex justify-between py-2 border-b border-slate-800 text-sm"
-          >
-
-            <span className="truncate">
-              {c.cliente}
-            </span>
-
-            <span>
-              ${c.total.toLocaleString()}
-            </span>
-
-          </div>
-
-        ))}
-
-      </Card>
-
-      <Card title="Actividad reciente">
-
-        {recent.map((p:any)=>(
-
-          <div
-            key={p.id}
-            className="flex justify-between py-2 border-b border-slate-800 text-sm"
-          >
-
-            <span className="truncate">
-              {p.cliente_nombre}
-            </span>
-
-            <span>
-              ${p.total}
-            </span>
-
-          </div>
-
-        ))}
-
-      </Card>
-
-    </div>
-
-  </div>
-
-  );
-
-}
-
-function KPI({title,value}:{title:string,value:any}){
-
-  return(
-
-  <div className="bg-black rounded-xl p-4 md:p-5">
-
-    <p className="text-xs md:text-sm text-gray-400">
-      {title}
-    </p>
-
-    <p className="text-lg md:text-2xl font-bold">
-      {value ?? 0}
-    </p>
-
-  </div>
-
-  );
-
-}
-
-function Card({title,children}:{title:string,children:any}){
-
-  return(
-
-  <div className="bg-black rounded-xl p-4 md:p-6">
-
-    <h2 className="mb-4 font-semibold text-sm md:text-base">
-      {title}
-    </h2>
-
-    {children}
 
   </div>
 

@@ -19,6 +19,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminDatos from "./pages/AdminDatos";
 
 import EmpresaDashboard from "./pages/EmpresaDashboard";
+import EmpresaTecnicos from "./pages/EmpresaTecnicos";
 
 import Home from "./pages/Home";
 import Cliente from "./pages/Cliente";
@@ -84,6 +85,7 @@ return(
 <Route element={<ProtectedRoute/>}>
 <Route path="/empresa" element={<EmpresaLayout/>}>
 <Route index element={<EmpresaDashboard/>}/>
+<Route path="/empresa/tecnicos" element={<EmpresaTecnicos/>}></Route>
 </Route>
 </Route>
 
